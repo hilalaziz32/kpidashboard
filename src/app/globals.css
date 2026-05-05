@@ -1,26 +1,82 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --paper: #F7F6FB;
+  --card: #FFFFFF;
+  --ink: #0E0B1A;
+  --ink-2: #1A1530;
+  --border: #ECEAF3;
+  --border-strong: #DCD8EA;
+  --muted: #6E6A82;
+  --text: #1A1530;
+
+  --violet: #6938EF;
+  --violet-600: #5B2BE0;
+  --violet-700: #4A22BD;
+  --violet-50: #F4F0FF;
+  --violet-100: #E7DEFF;
+  --violet-200: #CFBDFF;
+
+  --emerald: #10B981;
+  --rose: #F43F5E;
+  --amber: #F59E0B;
+  --sky: #0EA5E9;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--paper);
+  --color-foreground: var(--text);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-violet: var(--violet);
+  --color-violet-50: var(--violet-50);
+  --color-violet-100: var(--violet-100);
+  --color-violet-600: var(--violet-600);
+  --color-violet-700: var(--violet-700);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html, body {
+  background: var(--paper);
+  color: var(--text);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.tabular { font-variant-numeric: tabular-nums; font-family: var(--font-geist-mono), ui-monospace, monospace; }
+
+/* Subtle grain on the canvas for atmosphere */
+.grain::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.35;
+  background-image:
+    radial-gradient(1200px 600px at 90% -10%, rgba(105, 56, 239, 0.08), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgba(105, 56, 239, 0.05), transparent 60%);
 }
+
+/* Card */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+
+/* Stagger reveal */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.rise { animation: rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: #DCD8EA; border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #C4BEE0; }
