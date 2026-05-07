@@ -6,10 +6,11 @@ import { Lead, LEAD_STATUSES, LeadStatus, STATUS_LABEL } from "@/lib/types";
 import { useRouter } from "next/navigation";
 
 const STATUS_STYLE: Record<LeadStatus, { bg: string; fg: string; dot: string }> = {
-  meeting_booked: { bg: "#F1F1F5", fg: "#3F3D56", dot: "#94A3B8" },
+  "meeting booked": { bg: "#F1F1F5", fg: "#3F3D56", dot: "#94A3B8" },
   show: { bg: "#E0F2FE", fg: "#075985", dot: "#0EA5E9" },
-  no_show: { bg: "#FEE2E6", fg: "#9F1239", dot: "#F43F5E" },
-  proposal_sent: { bg: "#FEF3C7", fg: "#854D0E", dot: "#F59E0B" },
+  "no show": { bg: "#FEE2E6", fg: "#9F1239", dot: "#F43F5E" },
+  "not closed": { bg: "#FEE7E2", fg: "#9A3412", dot: "#F97316" },
+  "proposal sent": { bg: "#FEF3C7", fg: "#854D0E", dot: "#F59E0B" },
   won: { bg: "#D1FAE5", fg: "#065F46", dot: "#10B981" },
 };
 
@@ -40,7 +41,7 @@ export default function LeadsTable({ leads: initial }: { leads: Lead[] }) {
   const filtered = filter === "all" ? leads : leads.filter((l) => l.status === filter);
 
   const counts: Record<LeadStatus, number> = {
-    meeting_booked: 0, show: 0, no_show: 0, proposal_sent: 0, won: 0,
+    "meeting booked": 0, show: 0, "no show": 0, "not closed": 0, "proposal sent": 0, won: 0,
   };
   leads.forEach((l) => counts[l.status]++);
 

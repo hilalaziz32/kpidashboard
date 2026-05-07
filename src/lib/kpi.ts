@@ -20,21 +20,23 @@ export function computeKpis(leads: Lead[], now = new Date()): KpiSummary {
   const total = leads.length;
   const upcoming = leads.filter(
     (l) =>
-      l.status === "meeting_booked" &&
+      l.status === "meeting booked" &&
       l.date_of_meeting &&
       new Date(l.date_of_meeting) > now
   ).length;
-  // cumulative logic: shows include show + proposal_sent + won
+  // Cumulative: shows include anyone who actually showed up — show, not closed,
+  // proposal sent, or won.
   const shows = leads.filter((l) =>
-    ["show", "proposal_sent", "won"].includes(l.status)
+    ["show", "not closed", "proposal sent", "won"].includes(l.status)
   ).length;
-  const noShows = leads.filter((l) => l.status === "no_show").length;
-  // proposals sent counts proposal_sent + won
+  const noShows = leads.filter((l) => l.status === "no show").length;
+  // Proposals: anyone who got a proposal — proposal sent, not closed, or won.
   const proposalsSent = leads.filter((l) =>
-    ["proposal_sent", "won"].includes(l.status)
+    ["proposal sent", "not closed", "won"].includes(l.status)
   ).length;
   const won = leads.filter((l) => l.status === "won").length;
-  const proposalsActive = leads.filter((l) => l.status === "proposal_sent").length;
+  // Active proposals = proposal sent and not yet decided.
+  const proposalsActive = leads.filter((l) => l.status === "proposal sent").length;
 
   const closingRate = proposalsSent ? won / proposalsSent : 0;
   const bookedToProposal = total ? proposalsSent / total : 0;

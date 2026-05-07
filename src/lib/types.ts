@@ -1,23 +1,26 @@
 export type LeadStatus =
-  | "meeting_booked"
+  | "meeting booked"
   | "show"
-  | "no_show"
-  | "proposal_sent"
+  | "no show"
+  | "not closed"
+  | "proposal sent"
   | "won";
 
 export const LEAD_STATUSES: LeadStatus[] = [
-  "meeting_booked",
+  "meeting booked",
   "show",
-  "no_show",
-  "proposal_sent",
+  "no show",
+  "not closed",
+  "proposal sent",
   "won",
 ];
 
 export const STATUS_LABEL: Record<LeadStatus, string> = {
-  meeting_booked: "Meeting Booked",
+  "meeting booked": "Meeting Booked",
   show: "Show",
-  no_show: "No Show",
-  proposal_sent: "Proposal Sent",
+  "no show": "No Show",
+  "not closed": "Not Closed",
+  "proposal sent": "Proposal Sent",
   won: "Won",
 };
 

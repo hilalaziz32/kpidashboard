@@ -12,12 +12,33 @@ export default async function AllTimePage() {
     .eq("user_id", user!.id)
     .single();
 
-  const { data: leadsData } = await supabase
-    .from("leads")
-    .select("*")
-    .eq("client_id", me!.client_id)
-    .order("date_of_meeting", { ascending: false });
+  const [{ data: leadsData }, { data: marketingMonthly }] = await Promise.all([
+    supabase
+      .from("leads")
+      .select("*")
+      .eq("client_id", me!.client_id)
+      .order("date_of_meeting", { ascending: false }),
+    supabase
+      .from("monthly_marketing_stats")
+      .select("year, month, emails_sent, sms_sent, email_prs, sms_prs")
+      .eq("client_id", me!.client_id),
+  ]);
   const leads = (leadsData ?? []) as Lead[];
+  const marketingByMonth = new Map<string, { emails: number; sms: number; emailPrs: number; smsPrs: number }>();
+  let totalEmails = 0, totalSms = 0, totalEmailPrs = 0, totalSmsPrs = 0;
+  for (const m of marketingMonthly ?? []) {
+    const key = `${m.year}-${m.month - 1}`;
+    marketingByMonth.set(key, {
+      emails: m.emails_sent, sms: m.sms_sent,
+      emailPrs: m.email_prs, smsPrs: m.sms_prs,
+    });
+    totalEmails += m.emails_sent;
+    totalSms += m.sms_sent;
+    totalEmailPrs += m.email_prs;
+    totalSmsPrs += m.sms_prs;
+  }
+  const emailReplyRate = totalEmails ? totalEmailPrs / totalEmails : 0;
+  const smsReplyRate = totalSms ? totalSmsPrs / totalSms : 0;
 
   const byMonth = new Map<string, Lead[]>();
   for (const l of leads) {
@@ -68,12 +89,44 @@ export default async function AllTimePage() {
         </div>
       </div>
 
-      {/* Hero stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Hero stats — pipeline */}
+      <div>
+        <div className="text-[10px] uppercase tracking-[0.2em] text-[var(--muted)] mb-3">
+          Pipeline
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <HeroStat label="Total Meetings" value={totals.booked.toLocaleString()} accent />
         <HeroStat label="Closed-Won" value={totals.won.toLocaleString()} sub={`${(closing * 100).toFixed(1)}% close`} />
         <HeroStat label="MRR Added" value={fmtMoney(totals.mrr)} />
         <HeroStat label="Upfront" value={fmtMoney(totals.upfront)} />
+        </div>
+      </div>
+
+      {/* Hero stats — marketing */}
+      <div>
+        <div className="text-[10px] uppercase tracking-[0.2em] text-[var(--muted)] mb-3">
+          Marketing Activity
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <HeroStat
+            label="Emails Sent"
+            value={totalEmails.toLocaleString()}
+            sub={`${totalEmailPrs} positive replies · ${(emailReplyRate * 100).toFixed(2)}%`}
+          />
+          <HeroStat
+            label="SMS Sent"
+            value={totalSms.toLocaleString()}
+            sub={`${totalSmsPrs} positive replies · ${(smsReplyRate * 100).toFixed(2)}%`}
+          />
+          <HeroStat
+            label="Email Positive Replies"
+            value={totalEmailPrs.toLocaleString()}
+          />
+          <HeroStat
+            label="SMS Positive Replies"
+            value={totalSmsPrs.toLocaleString()}
+          />
+        </div>
       </div>
 
       {/* Monthly table */}
@@ -98,6 +151,10 @@ export default async function AllTimePage() {
                   { label: "Close Rate", align: "right" },
                   { label: "Active %", align: "right" },
                   { label: "Booked → Prop", align: "right" },
+                  { label: "Emails", align: "right" },
+                  { label: "SMS", align: "right" },
+                  { label: "Email PRs", align: "right" },
+                  { label: "SMS PRs", align: "right" },
                   { label: "Upfront", align: "right" },
                   { label: "MRR", align: "right" },
                 ].map((h) => (
@@ -116,7 +173,7 @@ export default async function AllTimePage() {
             <tbody>
               {rows.length === 0 && (
                 <tr>
-                  <td colSpan={11} className="px-6 py-16 text-center text-[var(--muted)]">
+                  <td colSpan={15} className="px-6 py-16 text-center text-[var(--muted)]">
                     No data yet. Once your automation pushes leads, this fills automatically.
                   </td>
                 </tr>
@@ -124,6 +181,7 @@ export default async function AllTimePage() {
               {rows.map((r) => {
                 const k = r.kpi;
                 const activePct = k.meetingsBooked ? k.proposalsActive / k.meetingsBooked : 0;
+                const mk = marketingByMonth.get(`${r.year}-${r.month}`);
                 return (
                   <tr
                     key={`${r.year}-${r.month}`}
@@ -151,6 +209,10 @@ export default async function AllTimePage() {
                     <Cell>{fmtPct(k.closingRate)}</Cell>
                     <Cell>{fmtPct(activePct)}</Cell>
                     <Cell>{fmtPct(k.bookedToProposal)}</Cell>
+                    <Cell>{(mk?.emails ?? 0).toLocaleString()}</Cell>
+                    <Cell>{(mk?.sms ?? 0).toLocaleString()}</Cell>
+                    <Cell>{mk?.emailPrs ?? 0}</Cell>
+                    <Cell>{mk?.smsPrs ?? 0}</Cell>
                     <Cell>{fmtMoney(k.totalUpfront)}</Cell>
                     <Cell strong>{fmtMoney(k.totalMrr)}</Cell>
                   </tr>
