@@ -5,6 +5,7 @@ export type KpiSummary = {
   upcomingMeetings: number;
   shows: number;
   noShows: number;
+  notClosed: number;
   proposalsSent: number;
   won: number;
   closingRate: number;
@@ -30,6 +31,7 @@ export function computeKpis(leads: Lead[], now = new Date()): KpiSummary {
     ["show", "not closed", "proposal sent", "won"].includes(l.status)
   ).length;
   const noShows = leads.filter((l) => l.status === "no show").length;
+  const notClosed = leads.filter((l) => l.status === "not closed").length;
   // Proposals: anyone who got a proposal — proposal sent, not closed, or won.
   const proposalsSent = leads.filter((l) =>
     ["proposal sent", "not closed", "won"].includes(l.status)
@@ -54,6 +56,7 @@ export function computeKpis(leads: Lead[], now = new Date()): KpiSummary {
     upcomingMeetings: upcoming,
     shows,
     noShows,
+    notClosed,
     proposalsSent,
     won,
     closingRate,

@@ -146,6 +146,7 @@ export default async function AllTimePage() {
                   { label: "Booked", align: "right" },
                   { label: "Shows", align: "right" },
                   { label: "No Shows", align: "right" },
+                  { label: "Not Closed", align: "right" },
                   { label: "Proposals", align: "right" },
                   { label: "Won", align: "right" },
                   { label: "Close Rate", align: "right" },
@@ -173,7 +174,7 @@ export default async function AllTimePage() {
             <tbody>
               {rows.length === 0 && (
                 <tr>
-                  <td colSpan={15} className="px-6 py-16 text-center text-[var(--muted)]">
+                  <td colSpan={16} className="px-6 py-16 text-center text-[var(--muted)]">
                     No data yet. Once your automation pushes leads, this fills automatically.
                   </td>
                 </tr>
@@ -199,6 +200,7 @@ export default async function AllTimePage() {
                     <Cell>{k.meetingsBooked}</Cell>
                     <Cell>{k.shows}</Cell>
                     <Cell>{k.noShows}</Cell>
+                    <Cell>{k.notClosed}</Cell>
                     <Cell>{k.proposalsSent}</Cell>
                     <Cell>
                       <span className="inline-flex items-center gap-1.5">

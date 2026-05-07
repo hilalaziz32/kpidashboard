@@ -120,11 +120,12 @@ export default async function MonthPage({
           <div className="text-[10px] uppercase tracking-[0.2em] text-[var(--muted)] mb-4">
             Status breakdown
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-4">
             <StatusItem label="Meetings Booked" value={k.meetingsBooked} pct={1} dot="bg-slate-400" />
             <StatusItem label="Upcoming" value={k.upcomingMeetings} pct={pct(k.upcomingMeetings, k.meetingsBooked)} dot="bg-sky-500" />
             <StatusItem label="Shows" value={k.shows} pct={pct(k.shows, k.meetingsBooked)} dot="bg-violet-500" />
             <StatusItem label="No Shows" value={k.noShows} pct={pct(k.noShows, k.meetingsBooked)} dot="bg-rose-500" />
+            <StatusItem label="Not Closed" value={k.notClosed} pct={pct(k.notClosed, k.meetingsBooked)} dot="bg-orange-500" />
             <StatusItem label="Proposals Sent" value={k.proposalsSent} pct={pct(k.proposalsSent, k.meetingsBooked)} dot="bg-amber-500" />
             <StatusItem label="Won" value={k.won} pct={pct(k.won, k.meetingsBooked)} dot="bg-emerald-500" />
           </div>

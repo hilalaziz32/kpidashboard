@@ -71,7 +71,7 @@ export default function LeadsTable({ leads: initial }: { leads: Lead[] }) {
           <thead>
             <tr className="text-left">
               {[
-                "Status", "Name", "Company", "Email", "Phone", "Booked", "Meeting",
+                "Status", "Name", "Company", "Email", "Phone", "Created", "Meeting",
                 "Upfront", "MRR", "Recording",
               ].map((h) => (
                 <th
@@ -244,5 +244,10 @@ function NumCell({ value, onSave }: { value: number; onSave: (v: number) => void
 
 function fmtDate(d: string | null) {
   if (!d) return "";
-  return new Date(d).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  return new Date(d).toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
