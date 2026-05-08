@@ -25,16 +25,16 @@ export function computeKpis(leads: Lead[], now = new Date()): KpiSummary {
       l.date_of_meeting &&
       new Date(l.date_of_meeting) > now
   ).length;
-  // Cumulative: shows include anyone who actually showed up — show, not closed,
-  // proposal sent, or won.
+  // Anyone who actually showed up to a call.
   const shows = leads.filter((l) =>
-    ["show", "not closed", "proposal sent", "won"].includes(l.status)
+    ["show", "not closed", "next stage", "proposal sent", "verbal agreement", "won"].includes(l.status)
   ).length;
   const noShows = leads.filter((l) => l.status === "no show").length;
+  // "not closed" is the DB value; UI labels it "Unqualified".
   const notClosed = leads.filter((l) => l.status === "not closed").length;
-  // Proposals: anyone who got a proposal — proposal sent, not closed, or won.
+  // Proposals: anyone who got a proposal — proposal sent, verbal agreement, or won.
   const proposalsSent = leads.filter((l) =>
-    ["proposal sent", "not closed", "won"].includes(l.status)
+    ["proposal sent", "verbal agreement", "won"].includes(l.status)
   ).length;
   const won = leads.filter((l) => l.status === "won").length;
   // Active proposals = proposal sent and not yet decided.

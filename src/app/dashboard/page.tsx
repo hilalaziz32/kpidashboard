@@ -146,7 +146,7 @@ export default async function AllTimePage() {
                   { label: "Booked", align: "right" },
                   { label: "Shows", align: "right" },
                   { label: "No Shows", align: "right" },
-                  { label: "Not Closed", align: "right" },
+                  { label: "Unqualified", align: "right" },
                   { label: "Proposals", align: "right" },
                   { label: "Won", align: "right" },
                   { label: "Close Rate", align: "right" },

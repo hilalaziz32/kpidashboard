@@ -3,7 +3,9 @@ export type LeadStatus =
   | "show"
   | "no show"
   | "not closed"
+  | "next stage"
   | "proposal sent"
+  | "verbal agreement"
   | "won";
 
 export const LEAD_STATUSES: LeadStatus[] = [
@@ -11,7 +13,9 @@ export const LEAD_STATUSES: LeadStatus[] = [
   "show",
   "no show",
   "not closed",
+  "next stage",
   "proposal sent",
+  "verbal agreement",
   "won",
 ];
 
@@ -19,8 +23,10 @@ export const STATUS_LABEL: Record<LeadStatus, string> = {
   "meeting booked": "Meeting Booked",
   show: "Show",
   "no show": "No Show",
-  "not closed": "Not Closed",
+  "not closed": "Unqualified",
+  "next stage": "Next Stage",
   "proposal sent": "Proposal Sent",
+  "verbal agreement": "Verbal Agreement",
   won: "Won",
 };
 

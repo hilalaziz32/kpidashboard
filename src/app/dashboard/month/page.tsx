@@ -63,7 +63,7 @@ export default async function MonthPage({
         <Stat label="Booked" value={k.meetingsBooked} />
         <Stat label="Shows" value={k.shows} />
         <Stat label="No Shows" value={k.noShows} />
-        <Stat label="Not Closed" value={k.notClosed} />
+        <Stat label="Unqualified" value={k.notClosed} />
         <Stat label="Proposals" value={k.proposalsSent} />
         <Stat label="Won" value={k.won} accent />
         <Stat label="Close Rate" value={fmtPct(k.closingRate)} />
