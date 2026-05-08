@@ -38,6 +38,7 @@ export type Lead = {
   upfront_collected: number | null;
   mrr_collected: number | null;
   call_recording_url: string | null;
+  notes: string | null;
 };
 
 export type Client = {
