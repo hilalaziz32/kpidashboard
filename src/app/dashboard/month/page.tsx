@@ -3,7 +3,6 @@ import { computeKpis, fmtMoney, fmtPct, MONTH_NAMES } from "@/lib/kpi";
 import { Client, Lead } from "@/lib/types";
 import LeadsTable from "./leads-table";
 import MonthSwitcher from "./month-switcher";
-import WeeklyBreakdown from "./weekly-breakdown";
 
 export default async function MonthPage({
   searchParams,
@@ -114,8 +113,6 @@ export default async function MonthPage({
           </div>
         </div>
       </div>
-
-      <WeeklyBreakdown leads={leads} year={year} month={month} />
 
       <LeadsTable leads={leads} />
     </div>
