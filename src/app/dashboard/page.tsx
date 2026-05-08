@@ -12,12 +12,25 @@ export default async function AllTimePage() {
     .eq("user_id", user!.id)
     .single();
 
-  const { data: leadsData } = await supabase
-    .from("leads")
-    .select("*")
-    .eq("client_id", me!.client_id)
-    .order("date_of_meeting", { ascending: false });
+  const [{ data: leadsData }, { data: marketingMonthly }] = await Promise.all([
+    supabase
+      .from("leads")
+      .select("*")
+      .eq("client_id", me!.client_id)
+      .order("date_of_meeting", { ascending: false }),
+    supabase
+      .from("monthly_marketing_stats")
+      .select("emails_sent, sms_sent, email_prs, sms_prs")
+      .eq("client_id", me!.client_id),
+  ]);
   const leads = (leadsData ?? []) as Lead[];
+  let totalEmails = 0, totalSms = 0, totalEmailPrs = 0, totalSmsPrs = 0;
+  for (const m of marketingMonthly ?? []) {
+    totalEmails += m.emails_sent;
+    totalSms += m.sms_sent;
+    totalEmailPrs += m.email_prs;
+    totalSmsPrs += m.sms_prs;
+  }
 
   const byMonth = new Map<string, Lead[]>();
   for (const l of leads) {
@@ -74,6 +87,20 @@ export default async function AllTimePage() {
         <HeroStat label="Closed-Won" value={totals.won.toLocaleString()} sub={`${(closing * 100).toFixed(1)}% close`} />
         <HeroStat label="MRR Added" value={fmtMoney(totals.mrr)} />
         <HeroStat label="Upfront" value={fmtMoney(totals.upfront)} />
+      </div>
+
+      {/* Outreach totals (compact) */}
+      <div className="grid grid-cols-2 gap-4">
+        <HeroStat
+          label="All-Time Emails Sent"
+          value={totalEmails.toLocaleString()}
+          sub={`${totalEmailPrs.toLocaleString()} positive replies`}
+        />
+        <HeroStat
+          label="All-Time SMS Sent"
+          value={totalSms.toLocaleString()}
+          sub={`${totalSmsPrs.toLocaleString()} positive replies`}
+        />
       </div>
 
       {/* Monthly table */}
