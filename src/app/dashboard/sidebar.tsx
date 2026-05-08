@@ -19,6 +19,7 @@ export default function Sidebar({
   const nav = [
     { href: "/dashboard", label: "All-Time", icon: AllTimeIcon },
     { href: "/dashboard/month", label: "Monthly", icon: MonthIcon },
+    { href: "/dashboard/marketing", label: "Marketing", icon: MarketingIcon },
     ...(isAdmin
       ? [{ href: "/dashboard/admin", label: "Admin", icon: AdminIcon }]
       : []),
@@ -153,6 +154,13 @@ function AdminIcon({ className }: { className?: string }) {
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
       <circle cx="12" cy="8" r="4" />
       <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
+    </svg>
+  );
+}
+function MarketingIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+      <path d="M3 11l18-7-7 18-2-8-9-3z" />
     </svg>
   );
 }

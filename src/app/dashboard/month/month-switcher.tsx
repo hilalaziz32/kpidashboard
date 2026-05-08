@@ -5,9 +5,11 @@ import { MONTH_NAMES } from "@/lib/kpi";
 export default function MonthSwitcher({
   year,
   month,
+  basePath = "/dashboard/month",
 }: {
   year: number;
   month: number;
+  basePath?: string;
 }) {
   const router = useRouter();
   const now = new Date();
@@ -17,12 +19,12 @@ export default function MonthSwitcher({
     <div className="flex items-center gap-2">
       <Select
         value={String(month)}
-        onChange={(v) => router.push(`/dashboard/month?y=${year}&m=${v}`)}
+        onChange={(v) => router.push(`${basePath}?y=${year}&m=${v}`)}
         options={MONTH_NAMES.map((n, i) => ({ value: String(i + 1), label: n }))}
       />
       <Select
         value={String(year)}
-        onChange={(v) => router.push(`/dashboard/month?y=${v}&m=${month}`)}
+        onChange={(v) => router.push(`${basePath}?y=${v}&m=${month}`)}
         options={years.map((y) => ({ value: String(y), label: String(y) }))}
       />
     </div>
