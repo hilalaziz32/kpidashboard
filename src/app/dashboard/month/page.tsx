@@ -3,6 +3,7 @@ import { computeKpis, fmtMoney, fmtPct, MONTH_NAMES } from "@/lib/kpi";
 import { Client, Lead } from "@/lib/types";
 import LeadsTable from "./leads-table";
 import MonthSwitcher from "./month-switcher";
+import WeeklyBreakdown from "./weekly-breakdown";
 
 export default async function MonthPage({
   searchParams,
@@ -114,6 +115,8 @@ export default async function MonthPage({
         </div>
       </div>
 
+      <WeeklyBreakdown leads={leads} year={year} month={month} />
+
       <LeadsTable leads={leads} />
     </div>
   );
@@ -144,12 +147,12 @@ function Stat({
   accent?: boolean;
 }) {
   return (
-    <div className="card p-4">
-      <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--muted)]">
+    <div className="card px-3 py-2.5">
+      <div className="text-[9px] uppercase tracking-[0.16em] text-[var(--muted)] truncate">
         {label}
       </div>
       <div
-        className={`tabular text-[24px] font-semibold tracking-tight mt-1 ${
+        className={`tabular text-[18px] font-semibold tracking-tight mt-0.5 ${
           accent ? "text-[var(--violet-600)]" : "text-[var(--ink)]"
         }`}
       >

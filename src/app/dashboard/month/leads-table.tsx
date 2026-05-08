@@ -91,7 +91,7 @@ export default function LeadsTable({ leads: initial }: { leads: Lead[] }) {
             <tbody>
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={11} className="px-6 py-16 text-center text-[var(--muted)]">
+                  <td colSpan={9} className="px-6 py-16 text-center text-[var(--muted)]">
                     {leads.length === 0
                       ? "No leads booked this month yet."
                       : "No leads match this filter."}
@@ -150,8 +150,6 @@ export default function LeadsTable({ leads: initial }: { leads: Lead[] }) {
                       )}
                     </td>
                     <td className="px-4 py-2.5 whitespace-nowrap text-[var(--text)]">{l.email}</td>
-                    <td className="px-4 py-2.5 whitespace-nowrap text-[var(--muted)] tabular">{l.phone}</td>
-                    <td className="px-4 py-2.5 whitespace-nowrap tabular text-[var(--muted)]">{fmtDate(l.created_date)}</td>
                     <td className="px-4 py-2.5 whitespace-nowrap tabular">{fmtDate(l.date_of_meeting)}</td>
                     <td className="px-4 py-2.5 whitespace-nowrap tabular text-right">
                       {Number(l.upfront_collected ?? 0) > 0 ? `$${Number(l.upfront_collected).toLocaleString()}` : <span className="text-[var(--border-strong)]">—</span>}

@@ -48,37 +48,37 @@ export default function LeadDrawer({
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={onClose}
       />
-      <aside className="relative ml-auto h-full w-full max-w-[560px] bg-white shadow-2xl flex flex-col rise-right">
+      <aside className="relative ml-auto h-full w-full max-w-[520px] bg-white shadow-2xl flex flex-col rise-right">
         {/* Header */}
-        <div className="px-8 pt-7 pb-6 border-b flex items-start justify-between gap-4" style={{ borderColor: "var(--border)" }}>
-          <div className="min-w-0 flex-1">
-            <div className="text-[10px] uppercase tracking-[0.22em] text-[var(--muted)] mb-1.5">
+        <div className="px-7 pt-5 pb-5 border-b" style={{ borderColor: "var(--border)" }}>
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-[10px] uppercase tracking-[0.22em] text-[var(--muted)]">
               Lead
-            </div>
-            <h2 className="text-[22px] font-semibold text-[var(--ink)] tracking-tight truncate leading-tight">
-              {lead.full_name || "Unnamed"}
-            </h2>
-            {lead.company_name && (
-              <div className="text-[13px] text-[var(--muted)] truncate mt-1">
-                {lead.company_name}
-              </div>
-            )}
+            </span>
+            <button
+              onClick={onClose}
+              className="rounded-md p-1.5 hover:bg-slate-100 text-[var(--muted)] -mr-1.5"
+              aria-label="Close"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M6 6l12 12M18 6l-12 12" />
+              </svg>
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="shrink-0 rounded-md p-2 hover:bg-slate-100 text-[var(--muted)] -mr-1"
-            aria-label="Close"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M6 6l12 12M18 6l-12 12" />
-            </svg>
-          </button>
+          <h2 className="text-[22px] font-semibold text-[var(--ink)] tracking-tight truncate leading-tight">
+            {lead.full_name || "Unnamed"}
+          </h2>
+          {lead.company_name && (
+            <div className="text-[13px] text-[var(--muted)] truncate mt-0.5">
+              {lead.company_name}
+            </div>
+          )}
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto px-8 py-7 space-y-7">
+        <div className="flex-1 overflow-y-auto px-7 py-5 space-y-5">
           {/* Read-only meta */}
-          <div className="grid grid-cols-2 gap-x-5 gap-y-5 text-[13px]">
+          <div className="grid grid-cols-2 gap-x-5 gap-y-3.5 text-[13px]">
             <Meta label="Email" value={lead.email} />
             <Meta label="Phone" value={lead.phone} />
             <Meta label="Website" value={lead.website} link />
@@ -150,7 +150,7 @@ export default function LeadDrawer({
         </div>
 
         {/* Footer */}
-        <div className="px-8 py-4 border-t flex items-center justify-end gap-3" style={{ borderColor: "var(--border)" }}>
+        <div className="px-7 py-4 border-t flex items-center justify-end gap-3" style={{ borderColor: "var(--border)" }}>
           {savedAt && (
             <span className="text-[12px] text-emerald-700">✓ Saved</span>
           )}
@@ -192,7 +192,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <span className="block text-[10px] uppercase tracking-[0.18em] text-[var(--muted)] mb-1.5">
         {label}
       </span>
-      {children}
+      <div>{children}</div>
     </label>
   );
 }
@@ -209,8 +209,8 @@ function Meta({
   wide?: boolean;
 }) {
   return (
-    <div className={wide ? "col-span-2" : undefined}>
-      <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--muted)] mb-0.5">
+    <div className={`min-w-0 ${wide ? "col-span-2" : ""}`}>
+      <div className="text-[10px] uppercase tracking-[0.18em] text-[var(--muted)] mb-1">
         {label}
       </div>
       <div className="text-[var(--ink)] truncate">

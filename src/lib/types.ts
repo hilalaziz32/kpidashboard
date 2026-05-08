@@ -10,9 +10,9 @@ export type LeadStatus =
 
 export const LEAD_STATUSES: LeadStatus[] = [
   "meeting booked",
-  "show",
   "no show",
   "not closed",
+  "show",
   "next stage",
   "proposal sent",
   "verbal agreement",
