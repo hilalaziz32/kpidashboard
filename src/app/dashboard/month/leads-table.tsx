@@ -75,8 +75,8 @@ export default function LeadsTable({ leads: initial }: { leads: Lead[] }) {
             <thead>
               <tr className="text-left">
                 {[
-                  "Status", "Name", "Company", "Email", "Phone",
-                  "Created Date", "Call Scheduled For", "Upfront", "MRR", "Recording", "Notes",
+                  "Status", "Name", "Company", "Email",
+                  "Call Scheduled For", "Upfront", "MRR", "Recording", "Notes",
                 ].map((h) => (
                   <th
                     key={h}
