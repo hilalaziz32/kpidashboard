@@ -13,8 +13,12 @@ export default function LeadDrawer({
   onSave: (patch: Partial<Lead>) => Promise<void> | void;
 }) {
   const [status, setStatus] = useState<LeadStatus>(lead.status);
-  const [upfront, setUpfront] = useState(String(lead.upfront_collected ?? 0));
-  const [mrr, setMrr] = useState(String(lead.mrr_collected ?? 0));
+  const [upfront, setUpfront] = useState(
+    lead.upfront_collected ? String(lead.upfront_collected) : ""
+  );
+  const [mrr, setMrr] = useState(
+    lead.mrr_collected ? String(lead.mrr_collected) : ""
+  );
   const [recording, setRecording] = useState(lead.call_recording_url ?? "");
   const [notes, setNotes] = useState(lead.notes ?? "");
   const [saving, setSaving] = useState(false);
@@ -147,31 +151,31 @@ export default function LeadDrawer({
               style={{ borderColor: "var(--border)" }}
             />
           </Field>
-        </div>
 
-        {/* Footer */}
-        <div className="px-7 py-4 border-t flex items-center justify-end gap-3" style={{ borderColor: "var(--border)" }}>
-          {savedAt && (
-            <span className="text-[12px] text-emerald-700">✓ Saved</span>
-          )}
-          <button
-            onClick={onClose}
-            className="rounded-lg border px-4 py-2 text-[13px] hover:bg-slate-50"
-            style={{ borderColor: "var(--border)" }}
-          >
-            Close
-          </button>
-          <button
-            onClick={save}
-            disabled={saving}
-            className="rounded-lg text-white font-medium px-4 py-2 text-[13px] transition-all disabled:opacity-50 hover:translate-y-[-1px] hover:shadow-lg"
-            style={{
-              background: "var(--violet)",
-              boxShadow: "0 4px 14px -4px rgba(105,56,239,0.45)",
-            }}
-          >
-            {saving ? "Saving…" : "Save changes"}
-          </button>
+          {/* Save controls — directly under Notes */}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={save}
+              disabled={saving}
+              className="rounded-lg text-white font-medium px-5 py-2.5 text-[13px] transition-all disabled:opacity-50 hover:translate-y-[-1px] hover:shadow-lg"
+              style={{
+                background: "var(--violet)",
+                boxShadow: "0 4px 14px -4px rgba(105,56,239,0.45)",
+              }}
+            >
+              {saving ? "Saving…" : "Save changes"}
+            </button>
+            <button
+              onClick={onClose}
+              className="rounded-lg border px-4 py-2.5 text-[13px] hover:bg-slate-50"
+              style={{ borderColor: "var(--border)" }}
+            >
+              Close
+            </button>
+            {savedAt && (
+              <span className="text-[12px] text-emerald-700">✓ Saved</span>
+            )}
+          </div>
         </div>
       </aside>
 

@@ -15,6 +15,8 @@ const STATUS_STYLE: Record<LeadStatus, { bg: string; fg: string; dot: string }> 
   "proposal sent":     { bg: "#FEF3C7", fg: "#854D0E", dot: "#F59E0B" },
   "verbal agreement":  { bg: "#CFFAFE", fg: "#155E75", dot: "#06B6D4" },
   won:                 { bg: "#D1FAE5", fg: "#065F46", dot: "#10B981" },
+  lost:                { bg: "#F3E8FF", fg: "#6B21A8", dot: "#A855F7" },
+  future:              { bg: "#FEF9C3", fg: "#713F12", dot: "#CA8A04" },
 };
 
 export default function LeadsTable({ leads: initial }: { leads: Lead[] }) {
@@ -43,6 +45,7 @@ export default function LeadsTable({ leads: initial }: { leads: Lead[] }) {
   const counts: Record<LeadStatus, number> = {
     "meeting booked": 0, show: 0, "no show": 0, "not closed": 0,
     "next stage": 0, "proposal sent": 0, "verbal agreement": 0, won: 0,
+    lost: 0, future: 0,
   };
   leads.forEach((l) => counts[l.status]++);
 
