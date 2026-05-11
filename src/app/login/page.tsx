@@ -53,41 +53,43 @@ export default function LoginPage() {
           <span className="text-white font-semibold tracking-tight">Scaletopia</span>
         </div>
 
-        <div className="relative z-10 rise">
-          <div className="text-[11px] uppercase tracking-[0.25em] text-violet-200/60 mb-4">
-            Sales Intelligence
+        <div className="relative z-10 rise max-w-lg">
+          <div className="text-[11px] uppercase tracking-[0.25em] text-violet-200/60 mb-5">
+            Scaletopia · Client Portal
           </div>
-          <h1 className="text-white text-5xl leading-[1.05] tracking-tight font-semibold">
-            Pipeline.
+          <h1 className="text-white text-[56px] leading-[1.02] tracking-tight font-semibold">
+            Your pipeline,
             <br />
-            <span style={{ color: "#A78BFA" }}>Quantified.</span>
+            <span
+              style={{
+                background: "linear-gradient(90deg, #A78BFA 0%, #C4B5FD 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              in real time.
+            </span>
           </h1>
-          <p className="text-white/50 mt-5 text-[15px] max-w-sm leading-relaxed">
-            Real-time visibility on meetings, proposals, and revenue — across every
-            client we run.
+          <p className="text-white/55 mt-6 text-[16px] leading-relaxed">
+            Every booked meeting, every proposal, every close — synced live from
+            the team running your outbound. No spreadsheets, no waiting on
+            updates.
           </p>
 
-          <div className="mt-12 grid grid-cols-3 gap-3 max-w-md">
-            {[
-              { k: "13", l: "Tenants" },
-              { k: "Live", l: "Sync" },
-              { k: "RLS", l: "Isolated" },
-            ].map((s) => (
-              <div
-                key={s.l}
-                className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3"
-              >
-                <div className="text-white text-xl font-semibold tabular">{s.k}</div>
-                <div className="text-[10px] uppercase tracking-widest text-white/40 mt-1">
-                  {s.l}
-                </div>
-              </div>
-            ))}
+          <div
+            className="mt-12 inline-flex items-center gap-3 rounded-full border border-white/10 px-4 py-2 text-[12px] text-white/60"
+            style={{ background: "rgba(255,255,255,0.03)" }}
+          >
+            <span
+              className="w-2 h-2 rounded-full"
+              style={{ background: "#10B981", boxShadow: "0 0 12px #10B981" }}
+            />
+            All client tenants synced and live
           </div>
         </div>
 
         <div className="text-[11px] text-white/30 relative z-10">
-          © Scaletopia · 2026
+          © Scaletopia · {new Date().getFullYear()}
         </div>
       </div>
 

@@ -60,16 +60,36 @@ export default function LeadDrawer({
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={onClose}
       />
-      <aside className="relative ml-auto h-full w-full max-w-[520px] bg-white shadow-2xl flex flex-col rise-right">
+      <aside
+        className="relative ml-auto h-full w-full max-w-[540px] flex flex-col rise-right"
+        style={{
+          background: "#FBFAFC",
+          boxShadow: "-32px 0 80px -20px rgba(15,11,26,0.25)",
+        }}
+      >
         {/* Header */}
-        <div className="px-7 pt-5 pb-5 border-b" style={{ borderColor: "var(--border)" }}>
+        <div
+          className="px-7 pt-6 pb-5 relative"
+          style={{
+            background: "white",
+            borderBottom: "1px solid var(--border-strong)",
+          }}
+        >
+          {/* Violet accent bar on the left edge of the header */}
+          <div
+            className="absolute left-0 top-0 bottom-0 w-1"
+            style={{
+              background:
+                "linear-gradient(180deg, var(--violet) 0%, #A78BFA 100%)",
+            }}
+          />
           <div className="flex items-center justify-between mb-3">
-            <span className="text-[10px] uppercase tracking-[0.22em] text-[var(--muted)]">
+            <span className="text-[10px] uppercase tracking-[0.22em] text-[var(--muted)] font-semibold">
               Lead
             </span>
             <button
               onClick={onClose}
-              className="rounded-md p-1.5 hover:bg-slate-100 text-[var(--muted)] -mr-1.5"
+              className="rounded-lg p-1.5 hover:bg-slate-100 text-[var(--muted)] hover:text-[var(--ink)] transition -mr-1.5"
               aria-label="Close"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -88,9 +108,12 @@ export default function LeadDrawer({
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto px-7 py-5 space-y-5">
+        <div className="flex-1 overflow-y-auto px-7 py-6 space-y-5">
           {/* Read-only meta */}
-          <div className="grid grid-cols-2 gap-x-5 gap-y-3.5 text-[13px]">
+          <div
+            className="rounded-xl border bg-white p-4 grid grid-cols-2 gap-x-5 gap-y-3.5 text-[13px]"
+            style={{ borderColor: "var(--border)" }}
+          >
             <Meta label="Email" value={lead.email} />
             <Meta label="Phone" value={lead.phone} />
             <Meta label="Website" value={lead.website} link />
@@ -108,7 +131,7 @@ export default function LeadDrawer({
               value={status}
               onChange={(e) => setStatus(e.target.value as LeadStatus)}
               className="w-full rounded-lg border bg-white px-3.5 py-2.5 text-[13px] outline-none focus:border-[var(--violet)] focus:ring-4 focus:ring-[var(--violet-50)]"
-              style={{ borderColor: "var(--border)" }}
+              style={{ borderColor: "var(--border-strong)" }}
             >
               {LEAD_STATUSES.map((s) => (
                 <option key={s} value={s}>{STATUS_LABEL[s]}</option>
@@ -144,7 +167,7 @@ export default function LeadDrawer({
               value={recording}
               onChange={(e) => setRecording(e.target.value)}
               className="w-full rounded-lg border bg-white px-3.5 py-2.5 text-[13px] outline-none focus:border-[var(--violet)] focus:ring-4 focus:ring-[var(--violet-50)]"
-              style={{ borderColor: "var(--border)" }}
+              style={{ borderColor: "var(--border-strong)" }}
             />
             {recording && (
               <a
@@ -166,7 +189,7 @@ export default function LeadDrawer({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               className="w-full rounded-lg border bg-white px-3.5 py-2.5 text-[13px] outline-none resize-y focus:border-[var(--violet)] focus:ring-4 focus:ring-[var(--violet-50)]"
-              style={{ borderColor: "var(--border)" }}
+              style={{ borderColor: "var(--border-strong)" }}
             />
           </Field>
 
@@ -186,7 +209,7 @@ export default function LeadDrawer({
             <button
               onClick={onClose}
               className="rounded-lg border px-4 py-2.5 text-[13px] hover:bg-slate-50"
-              style={{ borderColor: "var(--border)" }}
+              style={{ borderColor: "var(--border-strong)" }}
             >
               Close
             </button>
@@ -258,15 +281,25 @@ function Meta({
 }
 
 function Money({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [focused, setFocused] = useState(false);
+  const showDollar = value !== "" || focused;
   return (
     <div className="relative">
-      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[13px] text-[var(--muted)] pointer-events-none">$</span>
+      {showDollar && (
+        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[13px] text-[var(--muted)] pointer-events-none transition-opacity">
+          $
+        </span>
+      )}
       <input
         type="number"
         step="0.01"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg border bg-white pl-7 pr-3 py-2.5 text-[13px] tabular text-right outline-none focus:border-[var(--violet)] focus:ring-4 focus:ring-[var(--violet-50)]"
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        className={`w-full rounded-lg border bg-white py-2.5 text-[13px] tabular outline-none focus:border-[var(--violet)] focus:ring-4 focus:ring-[var(--violet-50)] ${
+          showDollar ? "pl-7 pr-3 text-right" : "px-3.5 text-left"
+        }`}
         style={{ borderColor: "var(--border)" }}
       />
     </div>
