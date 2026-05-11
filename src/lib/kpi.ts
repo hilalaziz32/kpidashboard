@@ -6,8 +6,11 @@ export type KpiSummary = {
   shows: number;
   noShows: number;
   notClosed: number;
+  nextStageOrBeyond: number;
   proposalsSent: number;
   won: number;
+  lost: number;
+  future: number;
   closingRate: number;
   proposalsActive: number;
   bookedToProposal: number;
@@ -38,6 +41,12 @@ export function computeKpis(leads: Lead[], now = new Date()): KpiSummary {
     ["proposal sent", "verbal agreement", "won", "lost", "future"].includes(l.status)
   ).length;
   const won = leads.filter((l) => l.status === "won").length;
+  const lost = leads.filter((l) => l.status === "lost").length;
+  const future = leads.filter((l) => l.status === "future").length;
+  // Reached "next stage" or beyond — used for funnel conversion.
+  const nextStageOrBeyond = leads.filter((l) =>
+    ["next stage", "proposal sent", "verbal agreement", "won", "lost", "future"].includes(l.status)
+  ).length;
   // Active proposals = proposal sent and not yet decided.
   const proposalsActive = leads.filter((l) => l.status === "proposal sent").length;
 
@@ -58,8 +67,11 @@ export function computeKpis(leads: Lead[], now = new Date()): KpiSummary {
     shows,
     noShows,
     notClosed,
+    nextStageOrBeyond,
     proposalsSent,
     won,
+    lost,
+    future,
     closingRate,
     proposalsActive,
     bookedToProposal,

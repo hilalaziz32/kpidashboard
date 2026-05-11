@@ -19,6 +19,7 @@ export default function Sidebar({
   const nav = [
     { href: "/dashboard", label: "All-Time", icon: AllTimeIcon },
     { href: "/dashboard/month", label: "Monthly", icon: MonthIcon },
+    { href: "/dashboard/pipeline", label: "Pipeline", icon: PipelineIcon },
     // Marketing hidden for now — page still lives at /dashboard/marketing.
     ...(isAdmin
       ? [
@@ -164,6 +165,13 @@ function MarketingIcon({ className }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
       <path d="M3 11l18-7-7 18-2-8-9-3z" />
+    </svg>
+  );
+}
+function PipelineIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+      <path d="M3 6h18M5 12h14M8 18h8" strokeLinecap="round" />
     </svg>
   );
 }

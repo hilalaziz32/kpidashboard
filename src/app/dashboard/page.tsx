@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { computeKpis, fmtMoney, fmtPct, MONTH_NAMES } from "@/lib/kpi";
 import { Lead } from "@/lib/types";
 import Link from "next/link";
+import Funnel from "./funnel";
 
 export default async function AllTimePage() {
   const supabase = await createClient();
@@ -57,6 +58,8 @@ export default async function AllTimePage() {
   );
   const closing = totals.booked ? totals.won / totals.booked : 0;
 
+  const overall = computeKpis(leads);
+
   return (
     <div className="space-y-10 rise">
       <div className="flex items-end justify-between gap-6">
@@ -102,6 +105,8 @@ export default async function AllTimePage() {
           sub={`${totalSmsPrs.toLocaleString()} positive replies`}
         />
       </div>
+
+      <Funnel k={overall} />
 
       {/* Monthly table */}
       <div className="card overflow-hidden">
