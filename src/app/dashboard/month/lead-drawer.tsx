@@ -19,6 +19,12 @@ export default function LeadDrawer({
   const [mrr, setMrr] = useState(
     lead.mrr_collected ? String(lead.mrr_collected) : ""
   );
+  const [dealMonthly, setDealMonthly] = useState(
+    lead.deal_size_monthly ? String(lead.deal_size_monthly) : ""
+  );
+  const [dealAnnual, setDealAnnual] = useState(
+    lead.deal_size_annual ? String(lead.deal_size_annual) : ""
+  );
   const [recording, setRecording] = useState(lead.call_recording_url ?? "");
   const [notes, setNotes] = useState(lead.notes ?? "");
   const [saving, setSaving] = useState(false);
@@ -38,6 +44,8 @@ export default function LeadDrawer({
       status,
       upfront_collected: Number(upfront) || 0,
       mrr_collected: Number(mrr) || 0,
+      deal_size_monthly: dealMonthly === "" ? null : Number(dealMonthly),
+      deal_size_annual: dealAnnual === "" ? null : Number(dealAnnual),
       call_recording_url: recording.trim() || null,
       notes: notes.trim() || null,
     });
@@ -108,7 +116,17 @@ export default function LeadDrawer({
             </select>
           </Field>
 
-          {/* Money */}
+          {/* Forecasted deal size */}
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Deal Size (Monthly)">
+              <Money value={dealMonthly} onChange={setDealMonthly} />
+            </Field>
+            <Field label="Deal Size (Annual)">
+              <Money value={dealAnnual} onChange={setDealAnnual} />
+            </Field>
+          </div>
+
+          {/* Actually collected */}
           <div className="grid grid-cols-2 gap-3">
             <Field label="Upfront Collected">
               <Money value={upfront} onChange={setUpfront} />

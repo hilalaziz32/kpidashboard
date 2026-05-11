@@ -19,9 +19,12 @@ export default function Sidebar({
   const nav = [
     { href: "/dashboard", label: "All-Time", icon: AllTimeIcon },
     { href: "/dashboard/month", label: "Monthly", icon: MonthIcon },
-    { href: "/dashboard/marketing", label: "Marketing", icon: MarketingIcon },
+    // Marketing hidden for now — page still lives at /dashboard/marketing.
     ...(isAdmin
-      ? [{ href: "/dashboard/admin", label: "Admin", icon: AdminIcon }]
+      ? [
+          { href: "/dashboard/marketing", label: "Marketing", icon: MarketingIcon },
+          { href: "/dashboard/admin", label: "Admin", icon: AdminIcon },
+        ]
       : []),
   ];
 
