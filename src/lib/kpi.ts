@@ -9,8 +9,6 @@ export type KpiSummary = {
   nextStageOrBeyond: number;
   proposalsSent: number;
   won: number;
-  lost: number;
-  future: number;
   closingRate: number;
   proposalsActive: number;
   bookedToProposal: number;
@@ -30,22 +28,19 @@ export function computeKpis(leads: Lead[], now = new Date()): KpiSummary {
   ).length;
   // Anyone who actually showed up to a call.
   const shows = leads.filter((l) =>
-    ["show", "not closed", "next stage", "proposal sent", "verbal agreement", "won", "lost", "future"].includes(l.status)
+    ["show", "not closed", "next stage", "proposal sent", "verbal agreement", "won"].includes(l.status)
   ).length;
   const noShows = leads.filter((l) => l.status === "no show").length;
   // "not closed" is the DB value; UI labels it "Unqualified".
   const notClosed = leads.filter((l) => l.status === "not closed").length;
-  // Proposals: anyone who got a proposal — proposal sent, verbal agreement, won, lost, or future.
-  // Lost/future leads typically had a proposal in flight.
+  // Proposals: anyone who got a proposal.
   const proposalsSent = leads.filter((l) =>
-    ["proposal sent", "verbal agreement", "won", "lost", "future"].includes(l.status)
+    ["proposal sent", "verbal agreement", "won"].includes(l.status)
   ).length;
   const won = leads.filter((l) => l.status === "won").length;
-  const lost = leads.filter((l) => l.status === "lost").length;
-  const future = leads.filter((l) => l.status === "future").length;
-  // Reached "next stage" or beyond — used for funnel conversion.
+  // Reached "next stage" or beyond.
   const nextStageOrBeyond = leads.filter((l) =>
-    ["next stage", "proposal sent", "verbal agreement", "won", "lost", "future"].includes(l.status)
+    ["next stage", "proposal sent", "verbal agreement", "won"].includes(l.status)
   ).length;
   // Active proposals = proposal sent and not yet decided.
   const proposalsActive = leads.filter((l) => l.status === "proposal sent").length;
@@ -70,8 +65,6 @@ export function computeKpis(leads: Lead[], now = new Date()): KpiSummary {
     nextStageOrBeyond,
     proposalsSent,
     won,
-    lost,
-    future,
     closingRate,
     proposalsActive,
     bookedToProposal,

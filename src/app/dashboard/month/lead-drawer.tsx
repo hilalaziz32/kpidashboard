@@ -200,7 +200,7 @@ export default function LeadDrawer({
           <Field label="Notes">
             <textarea
               rows={6}
-              placeholder="Anything worth remembering about this lead — talking points, objections, next steps."
+              placeholder="Anything worth remembering about this lead. Talking points, objections, next steps."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               className="w-full rounded-lg border bg-white px-3.5 py-2.5 text-[13px] outline-none resize-y focus:border-[var(--violet)] focus:ring-4 focus:ring-[var(--violet-50)]"
@@ -289,7 +289,7 @@ function Meta({
             value
           )
         ) : (
-          <span className="text-[var(--border-strong)]">—</span>
+          <span className="text-[var(--border-strong)]"></span>
         )}
       </div>
     </div>

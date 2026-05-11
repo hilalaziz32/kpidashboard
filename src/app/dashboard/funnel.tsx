@@ -9,8 +9,6 @@ export default function Funnel({ k }: { k: KpiSummary }) {
     { label: "Proposals", value: k.proposalsSent },
     { label: "Won", value: k.won, accent: true },
   ];
-  const lost = k.lost;
-
   return (
     <div className="card p-6">
       <div className="flex items-baseline justify-between mb-5">
@@ -22,12 +20,6 @@ export default function Funnel({ k }: { k: KpiSummary }) {
             Stage-by-stage conversion
           </h3>
         </div>
-        {lost > 0 && (
-          <div className="text-[12px] text-[var(--muted)]">
-            <span className="tabular text-rose-600 font-medium">{lost}</span>{" "}
-            lost
-          </div>
-        )}
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">

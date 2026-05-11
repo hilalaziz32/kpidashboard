@@ -71,7 +71,7 @@ export default function LoginPage() {
             </span>
           </h1>
           <p className="text-white/55 mt-6 text-[16px] leading-relaxed">
-            Every booked meeting, every proposal, every close — synced live from
+            Every booked meeting, every proposal, every close, synced live from
             the team running your outbound. No spreadsheets, no waiting on
             updates.
           </p>

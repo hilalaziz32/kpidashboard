@@ -51,7 +51,7 @@ export default async function PipelinePage({
           All Leads
         </h1>
         <p className="text-[14px] text-[var(--muted)] mt-1.5">
-          Cross-month view — filter by date range and pipeline stage.
+          Cross-month view. Filter by date range and pipeline stage.
         </p>
       </div>
 

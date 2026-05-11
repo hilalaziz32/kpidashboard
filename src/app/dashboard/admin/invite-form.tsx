@@ -57,7 +57,7 @@ export default function InviteForm({ clients }: { clients: ClientRow[] }) {
       <div>
         <h3 className="text-[14px] font-semibold text-[var(--ink)]">Invite a user</h3>
         <p className="text-[12px] text-[var(--muted)] mt-0.5">
-          Set their password directly — share the credentials with them and they can change it later.
+          Set their password directly. Share the credentials with them and they can change it later.
         </p>
       </div>
 
@@ -161,7 +161,7 @@ export default function InviteForm({ clients }: { clients: ClientRow[] }) {
         >
           <div className="flex items-center justify-between mb-3">
             <div className="text-[11px] uppercase tracking-[0.18em] font-semibold text-[var(--violet-700)]">
-              ✓ User created — share these credentials
+              ✓ User created. Share these credentials
             </div>
             <button
               onClick={copyCredentials}

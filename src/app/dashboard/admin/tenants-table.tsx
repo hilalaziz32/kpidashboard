@@ -155,7 +155,7 @@ function MoneyCell({
         type="number"
         step="0.01"
         value={v}
-        placeholder="—"
+        placeholder=""
         onChange={(e) => setV(e.target.value)}
         onBlur={() => {
           if (v === "") {

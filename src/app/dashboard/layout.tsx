@@ -17,7 +17,7 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen flex relative z-10">
       <Sidebar
-        clientName={active?.name ?? "—"}
+        clientName={active?.name ?? ""}
         userEmail={user.email ?? ""}
         isAdmin={active?.isAdmin ?? false}
         activeTenantId={active?.clientId ?? null}

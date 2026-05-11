@@ -29,7 +29,7 @@ export async function getActiveTenant(): Promise<ActiveTenant | null> {
       | null;
     return {
       clientId: c?.id ?? null,
-      name: c?.name ?? "—",
+      name: c?.name ?? "",
       isAdmin: false,
       allTenants: [],
     };

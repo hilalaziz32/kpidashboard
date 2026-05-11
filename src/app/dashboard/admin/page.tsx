@@ -68,7 +68,7 @@ export default async function AdminPage({
             email: m.email,
             role: m.role,
             client_name:
-              (Array.isArray(m.clients) ? m.clients[0]?.name : (m.clients as { name?: string } | null)?.name) ?? "—",
+              (Array.isArray(m.clients) ? m.clients[0]?.name : (m.clients as { name?: string } | null)?.name) ?? "",
           }))}
         />
       )}
