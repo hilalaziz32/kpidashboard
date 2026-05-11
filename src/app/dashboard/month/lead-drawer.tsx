@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Lead, LEAD_STATUSES, LeadStatus, STATUS_LABEL } from "@/lib/types";
 
 export default function LeadDrawer({
@@ -30,6 +31,9 @@ export default function LeadDrawer({
   const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState<number | null>(null);
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape") onClose();
@@ -37,6 +41,15 @@ export default function LeadDrawer({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
+
+  // Lock body scroll while drawer is open
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, []);
 
   async function save() {
     setSaving(true);
@@ -54,8 +67,10 @@ export default function LeadDrawer({
     setTimeout(() => setSavedAt(null), 1500);
   }
 
-  return (
-    <div className="fixed inset-0 z-50 flex">
+  if (!mounted) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex">
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={onClose}
@@ -227,7 +242,8 @@ export default function LeadDrawer({
         }
         .rise-right { animation: riseRight 0.22s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
       `}</style>
-    </div>
+    </div>,
+    document.body
   );
 }
 
