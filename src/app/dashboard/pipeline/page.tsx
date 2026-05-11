@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { Lead } from "@/lib/types";
 import PipelineView from "./pipeline-view";
+import { getActiveTenant } from "@/lib/active-tenant";
 
 export default async function PipelinePage({
   searchParams,
@@ -18,17 +19,22 @@ export default async function PipelinePage({
   toExclusive.setDate(toExclusive.getDate() + 1);
 
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  const { data: me } = await supabase
-    .from("client_users")
-    .select("client_id")
-    .eq("user_id", user!.id)
-    .single();
+  const active = await getActiveTenant();
+  const tenantId = active?.clientId;
+
+  if (!tenantId) {
+    return (
+      <div className="card p-12 text-center">
+        <h2 className="text-xl font-semibold text-[var(--ink)]">No tenant selected</h2>
+        <p className="text-sm text-[var(--muted)] mt-1">Pick a tenant from the sidebar.</p>
+      </div>
+    );
+  }
 
   const { data: leadsData } = await supabase
     .from("leads")
     .select("*")
-    .eq("client_id", me!.client_id)
+    .eq("client_id", tenantId)
     .gte("date_of_meeting", from)
     .lt("date_of_meeting", toExclusive.toISOString().slice(0, 10))
     .order("date_of_meeting", { ascending: false });

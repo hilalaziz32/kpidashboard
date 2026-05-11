@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { MONTH_NAMES } from "@/lib/kpi";
 import MonthSwitcher from "../month/month-switcher";
+import { getActiveTenant } from "@/lib/active-tenant";
 
 type DailyRow = {
   stat_date: string;
@@ -24,18 +25,22 @@ export default async function MarketingPage({
   const end = new Date(year, month, 1).toISOString().slice(0, 10);
 
   const supabase = await createClient();
+  const active = await getActiveTenant();
+  const tenantId = active?.clientId;
 
-  const { data: { user } } = await supabase.auth.getUser();
-  const { data: me } = await supabase
-    .from("client_users")
-    .select("client_id")
-    .eq("user_id", user!.id)
-    .single();
+  if (!tenantId) {
+    return (
+      <div className="card p-12 text-center">
+        <h2 className="text-xl font-semibold text-[var(--ink)]">No tenant selected</h2>
+        <p className="text-sm text-[var(--muted)] mt-1">Pick a tenant from the sidebar.</p>
+      </div>
+    );
+  }
 
   const { data: dailyRaw } = await supabase
     .from("daily_marketing_stats")
     .select("stat_date, emails_sent, sms_sent, email_prs, sms_prs")
-    .eq("client_id", me!.client_id)
+    .eq("client_id", tenantId)
     .gte("stat_date", start)
     .lt("stat_date", end)
     .order("stat_date", { ascending: true });

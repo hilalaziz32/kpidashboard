@@ -3,15 +3,20 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import TenantSwitcher from "./tenant-switcher";
 
 export default function Sidebar({
   clientName,
   userEmail,
   isAdmin,
+  activeTenantId,
+  allTenants,
 }: {
   clientName: string;
   userEmail: string;
   isAdmin: boolean;
+  activeTenantId: string | null;
+  allTenants: { id: string; name: string; slug: string }[];
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -70,22 +75,30 @@ export default function Sidebar({
         </div>
       </div>
 
-      {/* Tenant pill */}
+      {/* Tenant area */}
       <div className="px-4 mb-6">
-        <div
-          className="rounded-xl px-3.5 py-3 border"
-          style={{
-            background: "rgba(255,255,255,0.04)",
-            borderColor: "rgba(255,255,255,0.08)",
-          }}
-        >
-          <div className="text-[10px] uppercase tracking-widest text-white/40">
-            Tenant
+        {isAdmin ? (
+          <TenantSwitcher
+            activeTenantId={activeTenantId}
+            activeTenantName={clientName}
+            allTenants={allTenants}
+          />
+        ) : (
+          <div
+            className="rounded-xl px-3.5 py-3 border"
+            style={{
+              background: "rgba(255,255,255,0.04)",
+              borderColor: "rgba(255,255,255,0.08)",
+            }}
+          >
+            <div className="text-[10px] uppercase tracking-widest text-white/40">
+              Tenant
+            </div>
+            <div className="text-white text-sm font-medium mt-0.5 truncate">
+              {clientName}
+            </div>
           </div>
-          <div className="text-white text-sm font-medium mt-0.5 truncate">
-            {clientName}
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Nav */}

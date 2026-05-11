@@ -3,26 +3,32 @@ import { computeKpis, fmtMoney, fmtPct, MONTH_NAMES } from "@/lib/kpi";
 import { Lead } from "@/lib/types";
 import Link from "next/link";
 import Funnel from "./funnel";
+import { getActiveTenant } from "@/lib/active-tenant";
 
 export default async function AllTimePage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  const { data: me } = await supabase
-    .from("client_users")
-    .select("client_id")
-    .eq("user_id", user!.id)
-    .single();
+  const active = await getActiveTenant();
+  const tenantId = active?.clientId;
+
+  if (!tenantId) {
+    return (
+      <div className="card p-12 text-center">
+        <h2 className="text-xl font-semibold text-[var(--ink)]">No tenant selected</h2>
+        <p className="text-sm text-[var(--muted)] mt-1">Pick a tenant from the sidebar.</p>
+      </div>
+    );
+  }
 
   const [{ data: leadsData }, { data: marketingMonthly }] = await Promise.all([
     supabase
       .from("leads")
       .select("*")
-      .eq("client_id", me!.client_id)
+      .eq("client_id", tenantId)
       .order("date_of_meeting", { ascending: false }),
     supabase
       .from("monthly_marketing_stats")
       .select("emails_sent, sms_sent, email_prs, sms_prs")
-      .eq("client_id", me!.client_id),
+      .eq("client_id", tenantId),
   ]);
   const leads = (leadsData ?? []) as Lead[];
   let totalEmails = 0, totalSms = 0, totalEmailPrs = 0, totalSmsPrs = 0;

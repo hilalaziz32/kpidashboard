@@ -3,6 +3,7 @@ import { computeKpis, fmtMoney, fmtPct, MONTH_NAMES } from "@/lib/kpi";
 import { Client, Lead } from "@/lib/types";
 import LeadsTable from "./leads-table";
 import MonthSwitcher from "./month-switcher";
+import { getActiveTenant } from "@/lib/active-tenant";
 
 export default async function MonthPage({
   searchParams,
@@ -18,16 +19,23 @@ export default async function MonthPage({
   const end = new Date(year, month, 1).toISOString();
 
   const supabase = await createClient();
+  const active = await getActiveTenant();
+  const myClientId = active?.clientId;
 
-  const { data: { user } } = await supabase.auth.getUser();
-  const { data: me } = await supabase
-    .from("client_users")
-    .select("client_id, role, clients(id, name, slug, kpi_target_meetings)")
-    .eq("user_id", user!.id)
-    .single();
+  if (!myClientId) {
+    return (
+      <div className="card p-12 text-center">
+        <h2 className="text-xl font-semibold text-[var(--ink)]">No tenant selected</h2>
+        <p className="text-sm text-[var(--muted)] mt-1">Pick a tenant from the sidebar.</p>
+      </div>
+    );
+  }
 
-  const client = (Array.isArray(me?.clients) ? me?.clients[0] : me?.clients) as Client | null;
-  const myClientId = client?.id;
+  const { data: client } = await supabase
+    .from("clients")
+    .select("id, name, slug, kpi_target_meetings")
+    .eq("id", myClientId)
+    .single<Client>();
 
   const { data: leadsData } = await supabase
     .from("leads")

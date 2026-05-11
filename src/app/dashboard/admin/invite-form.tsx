@@ -30,7 +30,7 @@ export default function InviteForm({ clients }: { clients: ClientRow[] }) {
       const supabase = createClient();
       const { error: rpcErr } = await supabase.rpc("admin_invite", {
         p_email: email,
-        p_client_id: clientId,
+        p_client_id: role === "admin" ? null : clientId,
         p_password: password,
         p_role: role,
       });
@@ -62,7 +62,7 @@ export default function InviteForm({ clients }: { clients: ClientRow[] }) {
       </div>
 
       <form onSubmit={submit} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className={`grid grid-cols-1 gap-3 ${role === "admin" ? "md:grid-cols-2" : "md:grid-cols-3"}`}>
           <Field label="Email">
             <input
               type="email"
@@ -75,19 +75,6 @@ export default function InviteForm({ clients }: { clients: ClientRow[] }) {
             />
           </Field>
 
-          <Field label="Tenant">
-            <select
-              value={clientId}
-              onChange={(e) => setClientId(e.target.value)}
-              className="w-full rounded-lg border bg-white px-3.5 py-2.5 text-[13px] outline-none transition focus:border-[var(--violet)] focus:ring-4 focus:ring-[var(--violet-50)]"
-              style={{ borderColor: "var(--border)" }}
-            >
-              {clients.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
-          </Field>
-
           <Field label="Role">
             <select
               value={role}
@@ -96,10 +83,35 @@ export default function InviteForm({ clients }: { clients: ClientRow[] }) {
               style={{ borderColor: "var(--border)" }}
             >
               <option value="client">Client</option>
-              <option value="admin">Admin (sees all)</option>
+              <option value="admin">Admin (sees all tenants)</option>
             </select>
           </Field>
+
+          {role === "client" && (
+            <Field label="Tenant">
+              <select
+                value={clientId}
+                onChange={(e) => setClientId(e.target.value)}
+                className="w-full rounded-lg border bg-white px-3.5 py-2.5 text-[13px] outline-none transition focus:border-[var(--violet)] focus:ring-4 focus:ring-[var(--violet-50)]"
+                style={{ borderColor: "var(--border)" }}
+              >
+                {clients.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </Field>
+          )}
         </div>
+
+        {role === "admin" && (
+          <div
+            className="rounded-lg px-3.5 py-2.5 text-[12px] flex items-center gap-2"
+            style={{ background: "var(--violet-50)", color: "var(--violet-700)" }}
+          >
+            <span className="font-semibold">Admin access:</span>
+            <span>This user will see all {clients.length} tenants and can manage settings.</span>
+          </div>
+        )}
 
         <Field label="Password">
           <div className="flex gap-2">
@@ -129,7 +141,7 @@ export default function InviteForm({ clients }: { clients: ClientRow[] }) {
         <div className="flex items-center gap-3">
           <button
             type="submit"
-            disabled={pending || !email || !clientId || password.length < 6}
+            disabled={pending || !email || (role === "client" && !clientId) || password.length < 6}
             className="rounded-lg text-white font-medium px-5 py-2.5 text-[13px] transition-all disabled:opacity-50 hover:translate-y-[-1px] hover:shadow-lg"
             style={{
               background: "var(--violet)",

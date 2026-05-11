@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getActiveTenant } from "@/lib/active-tenant";
 import Sidebar from "./sidebar";
 
 export default async function DashboardLayout({
@@ -11,23 +12,16 @@ export default async function DashboardLayout({
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: me } = await supabase
-    .from("client_users")
-    .select("role, client_id, clients(name)")
-    .eq("user_id", user.id)
-    .single();
-
-  const tenantName =
-    (Array.isArray(me?.clients)
-      ? me?.clients[0]?.name
-      : (me?.clients as unknown as { name?: string } | null)?.name) ?? "—";
+  const active = await getActiveTenant();
 
   return (
     <div className="min-h-screen flex relative z-10">
       <Sidebar
-        clientName={tenantName}
+        clientName={active?.name ?? "—"}
         userEmail={user.email ?? ""}
-        isAdmin={me?.role === "admin"}
+        isAdmin={active?.isAdmin ?? false}
+        activeTenantId={active?.clientId ?? null}
+        allTenants={active?.allTenants ?? []}
       />
       <main className="flex-1 px-8 py-10 overflow-x-hidden">{children}</main>
     </div>
