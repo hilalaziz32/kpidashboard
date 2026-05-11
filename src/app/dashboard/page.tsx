@@ -97,12 +97,10 @@ export default async function AllTimePage() {
         <HeroStat
           label="All-Time Emails Sent"
           value={totalEmails.toLocaleString()}
-          sub={`${totalEmailPrs.toLocaleString()} positive replies`}
         />
         <HeroStat
           label="All-Time SMS Sent"
           value={totalSms.toLocaleString()}
-          sub={`${totalSmsPrs.toLocaleString()} positive replies`}
         />
       </div>
 
