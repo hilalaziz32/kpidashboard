@@ -43,22 +43,17 @@ export default function LoginPage() {
           style={{ background: "rgba(167,139,250,0.18)" }}
         />
 
-        <div className="flex items-center gap-3 relative z-10">
-          <div
-            className="w-9 h-9 rounded-lg flex items-center justify-center"
-            style={{ background: "var(--violet)" }}
-          >
-            <span className="text-white font-bold tabular">S</span>
-          </div>
-          <span className="text-white font-semibold tracking-tight">Scaletopia</span>
+        <div className="relative z-10">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.svg" alt="Scaletopia" className="h-7 w-auto" />
         </div>
 
-        <div className="relative z-10 rise max-w-lg">
-          <div className="text-[11px] uppercase tracking-[0.25em] text-violet-200/60 mb-5">
-            Scaletopia · Client Portal
+        <div className="relative z-10 rise max-w-xl">
+          <div className="text-[11px] uppercase tracking-[0.28em] text-violet-200/70 mb-5 font-semibold">
+            Agency Pipeline · Client Portal
           </div>
           <h1 className="text-white text-[56px] leading-[1.02] tracking-tight font-semibold">
-            Your pipeline,
+            Predictable pipeline,
             <br />
             <span
               style={{
@@ -67,24 +62,35 @@ export default function LoginPage() {
                 WebkitTextFillColor: "transparent",
               }}
             >
-              in real time.
+              quantified in real time.
             </span>
           </h1>
-          <p className="text-white/55 mt-6 text-[16px] leading-relaxed">
-            Every booked meeting, every proposal, every close, synced live from
-            the team running your outbound. No spreadsheets, no waiting on
-            updates.
+          <p className="text-white/60 mt-6 text-[16px] leading-relaxed max-w-md">
+            Every qualified meeting we book, every proposal sent, every deal
+            closed. Live from the team running your multi-channel outbound.
           </p>
 
+          <div className="mt-10 flex flex-wrap items-center gap-2 max-w-md">
+            {["Meetings", "Proposals", "Pipeline", "Revenue"].map((t) => (
+              <span
+                key={t}
+                className="rounded-full border border-white/10 px-3 py-1 text-[11px] text-white/65 tracking-wide"
+                style={{ background: "rgba(255,255,255,0.04)" }}
+              >
+                {t}
+              </span>
+            ))}
+          </div>
+
           <div
-            className="mt-12 inline-flex items-center gap-3 rounded-full border border-white/10 px-4 py-2 text-[12px] text-white/60"
-            style={{ background: "rgba(255,255,255,0.03)" }}
+            className="mt-10 inline-flex items-center gap-2.5 rounded-full border border-white/10 px-3.5 py-1.5 text-[11px] text-white/65"
+            style={{ background: "rgba(255,255,255,0.04)" }}
           >
             <span
-              className="w-2 h-2 rounded-full"
-              style={{ background: "#10B981", boxShadow: "0 0 12px #10B981" }}
+              className="w-1.5 h-1.5 rounded-full"
+              style={{ background: "#10B981", boxShadow: "0 0 10px #10B981" }}
             />
-            All client tenants synced and live
+            Synced live with your campaigns
           </div>
         </div>
 
@@ -96,14 +102,9 @@ export default function LoginPage() {
       {/* Right: form */}
       <div className="flex items-center justify-center p-8 lg:p-12">
         <div className="w-full max-w-sm rise">
-          <div className="lg:hidden flex items-center gap-2 mb-10">
-            <div
-              className="w-8 h-8 rounded-md flex items-center justify-center"
-              style={{ background: "var(--violet)" }}
-            >
-              <span className="text-white text-xs font-bold">S</span>
-            </div>
-            <span className="font-semibold tracking-tight">Scaletopia</span>
+          <div className="lg:hidden mb-10">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.svg" alt="Scaletopia" className="h-6 w-auto" style={{ filter: "invert(1) hue-rotate(180deg)" }} />
           </div>
 
           <div className="text-[11px] uppercase tracking-[0.22em] text-[var(--muted)] mb-3">
