@@ -57,22 +57,8 @@ export default function Sidebar({
 
       {/* Brand */}
       <div className="px-6 pt-7 pb-8">
-        <div className="flex items-center gap-2.5">
-          <div
-            className="w-7 h-7 rounded-md flex items-center justify-center"
-            style={{ background: "var(--violet)" }}
-          >
-            <span className="text-white text-xs font-bold tabular">S</span>
-          </div>
-          <div>
-            <div className="text-white text-[13px] font-semibold leading-tight tracking-tight">
-              Scaletopia
-            </div>
-            <div className="text-[11px] tracking-wide text-white/40 uppercase">
-              Pipeline
-            </div>
-          </div>
-        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo.svg" alt="Scaletopia" className="h-6 w-auto" />
       </div>
 
       {/* Tenant area */}
