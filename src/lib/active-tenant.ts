@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { createClient } from "./supabase/server";
 
@@ -10,7 +11,9 @@ export type ActiveTenant = {
   allTenants: { id: string; name: string; slug: string }[];
 };
 
-export async function getActiveTenant(): Promise<ActiveTenant | null> {
+// React.cache() dedupes calls within a single request. Layout + page both
+// call this — without cache it'd hit the DB twice per page load.
+export const getActiveTenant = cache(async function _getActiveTenant(): Promise<ActiveTenant | null> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
@@ -56,6 +59,6 @@ export async function getActiveTenant(): Promise<ActiveTenant | null> {
     isAdmin: true,
     allTenants: tenants,
   };
-}
+});
 
 export const ACTIVE_TENANT_COOKIE = COOKIE;
