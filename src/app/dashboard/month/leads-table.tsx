@@ -20,9 +20,11 @@ const STATUS_STYLE: Record<LeadStatus, { bg: string; fg: string; dot: string }> 
 export default function LeadsTable({
   leads: initial,
   prMode = false,
+  isAdmin = false,
 }: {
   leads: Lead[];
   prMode?: boolean;
+  isAdmin?: boolean;
 }) {
   const [leads, setLeads] = useState(initial);
   const [filter, setFilter] = useState<LeadStatus | "all">("all");
@@ -40,6 +42,15 @@ export default function LeadsTable({
     const { error } = await supabase.from("leads").update(patch).eq("id", id);
     if (error) {
       alert(`Update failed: ${error.message}`);
+      start(() => router.refresh());
+    }
+  }
+
+  async function deleteLead(id: string) {
+    setLeads((ls) => ls.filter((l) => l.id !== id));
+    const { error } = await supabase.rpc("admin_delete_lead", { p_lead_id: id });
+    if (error) {
+      alert(`Delete failed: ${error.message}`);
       start(() => router.refresh());
     }
   }
@@ -212,6 +223,8 @@ export default function LeadsTable({
           lead={openLead}
           onClose={() => setOpenLeadId(null)}
           onSave={(patch) => patchLead(openLead.id, patch)}
+          onDelete={deleteLead}
+          isAdmin={isAdmin}
         />
       )}
     </>

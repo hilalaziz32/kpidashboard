@@ -21,10 +21,12 @@ export default function PipelineView({
   leads: initial,
   from,
   to,
+  isAdmin = false,
 }: {
   leads: Lead[];
   from: string;
   to: string;
+  isAdmin?: boolean;
 }) {
   const router = useRouter();
   const sp = useSearchParams();
@@ -244,6 +246,15 @@ export default function PipelineView({
           lead={openLead}
           onClose={() => setOpenLeadId(null)}
           onSave={(patch) => patchLead(openLead.id, patch)}
+          onDelete={async (id) => {
+            setLeads((ls) => ls.filter((l) => l.id !== id));
+            const { error } = await supabase.rpc("admin_delete_lead", { p_lead_id: id });
+            if (error) {
+              alert(`Delete failed: ${error.message}`);
+              router.refresh();
+            }
+          }}
+          isAdmin={isAdmin}
         />
       )}
     </>

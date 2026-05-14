@@ -8,10 +8,14 @@ export default function LeadDrawer({
   lead,
   onClose,
   onSave,
+  onDelete,
+  isAdmin = false,
 }: {
   lead: Lead;
   onClose: () => void;
   onSave: (patch: Partial<Lead>) => Promise<void> | void;
+  onDelete?: (id: string) => Promise<void> | void;
+  isAdmin?: boolean;
 }) {
   const [status, setStatus] = useState<LeadStatus>(lead.status);
   const [upfront, setUpfront] = useState(
@@ -230,6 +234,23 @@ export default function LeadDrawer({
             </button>
             {savedAt && (
               <span className="text-[12px] text-emerald-700">✓ Saved</span>
+            )}
+
+            {isAdmin && onDelete && (
+              <button
+                onClick={async () => {
+                  if (!confirm(`Delete ${lead.full_name || "this lead"}? This cannot be undone.`)) return;
+                  await onDelete(lead.id);
+                  onClose();
+                }}
+                className="ml-auto rounded-lg border text-[13px] px-4 py-2.5 transition hover:text-rose-700 hover:border-rose-300 hover:bg-rose-50"
+                style={{
+                  borderColor: "var(--border-strong)",
+                  color: "#9F1239",
+                }}
+              >
+                Delete lead
+              </button>
             )}
           </div>
         </div>

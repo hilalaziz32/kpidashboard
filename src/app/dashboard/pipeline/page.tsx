@@ -55,7 +55,7 @@ export default async function PipelinePage({
         </p>
       </div>
 
-      <PipelineView leads={leads} from={from} to={to} />
+      <PipelineView leads={leads} from={from} to={to} isAdmin={active?.isAdmin ?? false} />
     </div>
   );
 }

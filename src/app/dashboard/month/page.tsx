@@ -159,9 +159,9 @@ export default async function MonthPage({
       />
 
       {tab === "meetings" ? (
-        <LeadsTable leads={meetings} />
+        <LeadsTable leads={meetings} isAdmin={active?.isAdmin ?? false} />
       ) : (
-        <LeadsTable leads={prRows} prMode />
+        <LeadsTable leads={prRows} prMode isAdmin={active?.isAdmin ?? false} />
       )}
     </div>
   );
