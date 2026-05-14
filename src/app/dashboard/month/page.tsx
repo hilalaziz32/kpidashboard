@@ -3,17 +3,19 @@ import { computeKpis, fmtMoney, fmtPct, MONTH_NAMES } from "@/lib/kpi";
 import { Client, Lead } from "@/lib/types";
 import LeadsTable from "./leads-table";
 import MonthSwitcher from "./month-switcher";
+import CategoryTabs from "./category-tabs";
 import { getActiveTenant } from "@/lib/active-tenant";
 
 export default async function MonthPage({
   searchParams,
 }: {
-  searchParams: Promise<{ y?: string; m?: string }>;
+  searchParams: Promise<{ y?: string; m?: string; tab?: string }>;
 }) {
   const params = await searchParams;
   const now = new Date();
   const year = params.y ? Number(params.y) : now.getFullYear();
   const month = params.m ? Number(params.m) : now.getMonth() + 1;
+  const tab = params.tab === "pr" ? "pr" : "meetings";
 
   const start = new Date(year, month - 1, 1).toISOString();
   const end = new Date(year, month, 1).toISOString();
@@ -37,16 +39,42 @@ export default async function MonthPage({
     .eq("id", myClientId)
     .single<Client>();
 
-  const { data: leadsData } = await supabase
-    .from("leads")
-    .select("*")
-    .eq("client_id", myClientId!)
-    .gte("date_of_meeting", start)
-    .lt("date_of_meeting", end)
-    .order("date_of_meeting", { ascending: true });
+  // Two parallel queries: meetings (for KPIs) + PR count (for tab badge)
+  const [{ data: meetingsData }, { count: prCountRaw }] = await Promise.all([
+    supabase
+      .from("leads")
+      .select("*")
+      .eq("client_id", myClientId!)
+      .eq("category", "meeting")
+      .gte("date_of_meeting", start)
+      .lt("date_of_meeting", end)
+      .order("date_of_meeting", { ascending: true }),
+    supabase
+      .from("leads")
+      .select("id", { count: "exact", head: true })
+      .eq("client_id", myClientId!)
+      .eq("category", "pr")
+      .gte("created_date", start)
+      .lt("created_date", end),
+  ]);
+  const prCount = prCountRaw ?? 0;
 
-  const leads = (leadsData ?? []) as Lead[];
-  const k = computeKpis(leads);
+  // For PR tab, fetch the actual PR rows
+  let prRows: Lead[] = [];
+  if (tab === "pr") {
+    const { data } = await supabase
+      .from("leads")
+      .select("*")
+      .eq("client_id", myClientId!)
+      .eq("category", "pr")
+      .gte("created_date", start)
+      .lt("created_date", end)
+      .order("created_date", { ascending: false });
+    prRows = (data ?? []) as Lead[];
+  }
+
+  const meetings = (meetingsData ?? []) as Lead[];
+  const k = computeKpis(meetings);
   const target = client?.kpi_target_meetings ?? 0;
   const diff = target - k.meetingsBooked;
   const targetProgress = target > 0 ? Math.min(k.meetingsBooked / target, 1) : 0;
@@ -122,7 +150,19 @@ export default async function MonthPage({
         </div>
       </div>
 
-      <LeadsTable leads={leads} />
+      <CategoryTabs
+        active={tab}
+        year={year}
+        month={month}
+        meetingsCount={meetings.length}
+        prCount={prCount}
+      />
+
+      {tab === "meetings" ? (
+        <LeadsTable leads={meetings} />
+      ) : (
+        <LeadsTable leads={prRows} prMode />
+      )}
     </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Lead, LEAD_STATUSES, LeadStatus, STATUS_LABEL } from "@/lib/types";
+import { Lead, LEAD_STATUSES, LeadStatus, STATUS_LABEL, SOURCE_LABEL } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import LeadDrawer from "./lead-drawer";
 
@@ -17,7 +17,13 @@ const STATUS_STYLE: Record<LeadStatus, { bg: string; fg: string; dot: string }> 
   won:                 { bg: "#D1FAE5", fg: "#065F46", dot: "#10B981" },
 };
 
-export default function LeadsTable({ leads: initial }: { leads: Lead[] }) {
+export default function LeadsTable({
+  leads: initial,
+  prMode = false,
+}: {
+  leads: Lead[];
+  prMode?: boolean;
+}) {
   const [leads, setLeads] = useState(initial);
   const [filter, setFilter] = useState<LeadStatus | "all">("all");
   const [openLeadId, setOpenLeadId] = useState<string | null>(null);
@@ -74,10 +80,10 @@ export default function LeadsTable({ leads: initial }: { leads: Lead[] }) {
           <table className="w-full text-[13px]">
             <thead>
               <tr className="text-left">
-                {[
-                  "Status", "Name", "Company", "Email",
-                  "Call Scheduled For", "Upfront", "MRR", "Recording", "Notes",
-                ].map((h) => (
+                {(prMode
+                  ? ["Source", "Name", "Company", "Email", "Phone", "Replied On", "Notes"]
+                  : ["Status", "Name", "Company", "Email", "Call Scheduled For", "Upfront", "MRR", "Recording", "Notes"]
+                ).map((h) => (
                   <th
                     key={h}
                     className="px-4 py-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--muted)] whitespace-nowrap"
@@ -108,29 +114,33 @@ export default function LeadsTable({ leads: initial }: { leads: Lead[] }) {
                     style={{ borderTop: "1px solid var(--border)" }}
                   >
                     <td className="px-4 py-2.5" onClick={(e) => e.stopPropagation()}>
-                      <div className="relative inline-block">
-                        <select
-                          value={l.status}
-                          onChange={(e) =>
-                            patchLead(l.id, { status: e.target.value as LeadStatus })
-                          }
-                          className="appearance-none cursor-pointer rounded-full text-[11px] font-medium pl-7 pr-8 py-1.5 border-0 outline-none focus:ring-2 focus:ring-[var(--violet-200)]"
-                          style={{ background: s.bg, color: s.fg }}
-                        >
-                          {LEAD_STATUSES.map((opt) => (
-                            <option key={opt} value={opt}>{STATUS_LABEL[opt]}</option>
-                          ))}
-                        </select>
-                        <span
-                          className="absolute left-3 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full pointer-events-none"
-                          style={{ background: s.dot }}
-                        />
-                        <span className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: s.fg }}>
-                          <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                            <path d="M2 4l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                          </svg>
-                        </span>
-                      </div>
+                      {prMode ? (
+                        <SourceBadge source={l.source} />
+                      ) : (
+                        <div className="relative inline-block">
+                          <select
+                            value={l.status}
+                            onChange={(e) =>
+                              patchLead(l.id, { status: e.target.value as LeadStatus })
+                            }
+                            className="appearance-none cursor-pointer rounded-full text-[11px] font-medium pl-7 pr-8 py-1.5 border-0 outline-none focus:ring-2 focus:ring-[var(--violet-200)]"
+                            style={{ background: s.bg, color: s.fg }}
+                          >
+                            {LEAD_STATUSES.map((opt) => (
+                              <option key={opt} value={opt}>{STATUS_LABEL[opt]}</option>
+                            ))}
+                          </select>
+                          <span
+                            className="absolute left-3 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full pointer-events-none"
+                            style={{ background: s.dot }}
+                          />
+                          <span className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: s.fg }}>
+                            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                              <path d="M2 4l3 3 3-3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                            </svg>
+                          </span>
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 py-2.5 whitespace-nowrap font-medium text-[var(--ink)]">
                       {l.full_name}
@@ -150,30 +160,39 @@ export default function LeadsTable({ leads: initial }: { leads: Lead[] }) {
                       )}
                     </td>
                     <td className="px-4 py-2.5 whitespace-nowrap text-[var(--text)]">{l.email}</td>
-                    <td className="px-4 py-2.5 whitespace-nowrap tabular">{fmtDate(l.date_of_meeting)}</td>
-                    <td className="px-4 py-2.5 whitespace-nowrap tabular text-right">
-                      {Number(l.upfront_collected ?? 0) > 0 ? `$${Number(l.upfront_collected).toLocaleString()}` : <span className="text-[var(--border-strong)]"></span>}
-                    </td>
-                    <td className="px-4 py-2.5 whitespace-nowrap tabular text-right">
-                      {Number(l.mrr_collected ?? 0) > 0 ? `$${Number(l.mrr_collected).toLocaleString()}` : <span className="text-[var(--border-strong)]"></span>}
-                    </td>
-                    <td className="px-4 py-2.5 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                      {l.call_recording_url ? (
-                        <a
-                          href={l.call_recording_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-1.5 text-[12px] text-[var(--violet-600)] hover:underline"
-                        >
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <polygon points="5,3 19,12 5,21" />
-                          </svg>
-                          Play
-                        </a>
-                      ) : (
-                        <span className="text-[var(--border-strong)]"></span>
-                      )}
-                    </td>
+                    {prMode ? (
+                      <>
+                        <td className="px-4 py-2.5 whitespace-nowrap text-[var(--muted)] tabular">{l.phone}</td>
+                        <td className="px-4 py-2.5 whitespace-nowrap tabular">{fmtDate(l.created_date)}</td>
+                      </>
+                    ) : (
+                      <>
+                        <td className="px-4 py-2.5 whitespace-nowrap tabular">{fmtDate(l.date_of_meeting)}</td>
+                        <td className="px-4 py-2.5 whitespace-nowrap tabular text-right">
+                          {Number(l.upfront_collected ?? 0) > 0 ? `$${Number(l.upfront_collected).toLocaleString()}` : <span className="text-[var(--border-strong)]"></span>}
+                        </td>
+                        <td className="px-4 py-2.5 whitespace-nowrap tabular text-right">
+                          {Number(l.mrr_collected ?? 0) > 0 ? `$${Number(l.mrr_collected).toLocaleString()}` : <span className="text-[var(--border-strong)]"></span>}
+                        </td>
+                        <td className="px-4 py-2.5 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                          {l.call_recording_url ? (
+                            <a
+                              href={l.call_recording_url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1.5 text-[12px] text-[var(--violet-600)] hover:underline"
+                            >
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <polygon points="5,3 19,12 5,21" />
+                              </svg>
+                              Play
+                            </a>
+                          ) : (
+                            <span className="text-[var(--border-strong)]"></span>
+                          )}
+                        </td>
+                      </>
+                    )}
                     <td className="px-4 py-2.5 max-w-[240px]">
                       <div className="truncate text-[var(--muted)] text-[12px]">
                         {l.notes || <span className="text-[var(--border-strong)]"></span>}
@@ -228,6 +247,26 @@ function Pill({
       )}
       {children}
     </button>
+  );
+}
+
+function SourceBadge({ source }: { source: Lead["source"] }) {
+  if (!source) {
+    return <span className="text-[var(--border-strong)]">—</span>;
+  }
+  const STYLE: Record<string, { bg: string; fg: string; dot: string }> = {
+    email: { bg: "#E0F2FE", fg: "#075985", dot: "#0EA5E9" },
+    sms:   { bg: "#D1FAE5", fg: "#065F46", dot: "#10B981" },
+  };
+  const s = STYLE[source];
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 rounded-full text-[11px] font-medium px-3 py-1"
+      style={{ background: s.bg, color: s.fg }}
+    >
+      <span className="w-1.5 h-1.5 rounded-full" style={{ background: s.dot }} />
+      {SOURCE_LABEL[source]}
+    </span>
   );
 }
 

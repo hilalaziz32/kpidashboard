@@ -30,9 +30,19 @@ export const STATUS_LABEL: Record<LeadStatus, string> = {
   won: "Won",
 };
 
+export type LeadCategory = "meeting" | "pr";
+export type LeadSource = "email" | "sms";
+
+export const SOURCE_LABEL: Record<LeadSource, string> = {
+  email: "Email",
+  sms: "SMS",
+};
+
 export type Lead = {
   id: string;
   client_id: string;
+  category: LeadCategory;
+  source: LeadSource | null;
   status: LeadStatus;
   full_name: string | null;
   email: string | null;
