@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import LinkPending from "../link-pending";
 
 const TABS = [
   { key: "tenants", label: "Tenants" },
@@ -24,7 +25,7 @@ export default function AdminTabs({
           <Link
             key={t.key}
             href={`/dashboard/admin?tab=${t.key}`}
-            className={`rounded-lg px-4 py-1.5 text-[13px] font-medium transition ${
+            className={`inline-flex items-center gap-2 rounded-lg px-4 py-1.5 text-[13px] font-medium transition ${
               isActive
                 ? "text-white"
                 : "text-[var(--muted)] hover:text-[var(--ink)]"
@@ -39,6 +40,7 @@ export default function AdminTabs({
             }
           >
             {t.label}
+            <LinkPending light={isActive} />
           </Link>
         );
       })}

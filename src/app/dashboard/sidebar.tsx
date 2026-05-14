@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import TenantSwitcher from "./tenant-switcher";
+import LinkPending from "./link-pending";
 
 export default function Sidebar({
   clientName,
@@ -112,14 +113,43 @@ export default function Sidebar({
               />
               <Icon className="w-4 h-4" />
               <span className="font-medium">{item.label}</span>
+              <LinkPending light />
             </Link>
           );
         })}
       </nav>
 
       {/* Footer */}
-      <div className="px-4 pb-5 pt-4 border-t border-white/5">
-        <div className="px-2 mb-3">
+      <div className="px-4 pb-5 pt-4 border-t border-white/5 space-y-2">
+        {/* Tutorial */}
+        <a
+          href="https://www.loom.com/share/f6eb51c622db491e9ed743e8eb8577b4"
+          target="_blank"
+          rel="noreferrer"
+          className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-[12px] transition group"
+          style={{
+            background:
+              "linear-gradient(135deg, rgba(105,56,239,0.18) 0%, rgba(167,139,250,0.10) 100%)",
+            border: "1px solid rgba(167,139,250,0.22)",
+          }}
+        >
+          <span
+            className="flex items-center justify-center w-6 h-6 rounded-md shrink-0"
+            style={{ background: "var(--violet)" }}
+          >
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="white">
+              <polygon points="6,4 20,12 6,20" />
+            </svg>
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="text-white font-medium leading-tight">Watch tutorial</div>
+            <div className="text-[10px] text-white/50 mt-0.5">
+              2 min · how to use this dashboard
+            </div>
+          </div>
+        </a>
+
+        <div className="px-2 pt-2">
           <div className="text-[11px] text-white/40 truncate">{userEmail}</div>
           <div className="text-[10px] uppercase tracking-widest text-white/30 mt-0.5">
             {isAdmin ? "Admin" : "Client"}
