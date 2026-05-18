@@ -124,6 +124,17 @@ export default function LeadDrawer({
               {lead.company_name}
             </div>
           )}
+          {lead.campaign_name && (
+            <div
+              className="inline-block mt-2.5 rounded-full text-[11px] px-2.5 py-1 font-medium"
+              style={{
+                background: "var(--violet-50)",
+                color: "var(--violet-700)",
+              }}
+            >
+              {lead.campaign_name}
+            </div>
+          )}
         </div>
 
         {/* Body */}
@@ -199,6 +210,20 @@ export default function LeadDrawer({
               </a>
             )}
           </Field>
+
+          {/* Conversation history (read-only) */}
+          {lead.conversation_history && (
+            <Field label="Conversation history">
+              <div
+                className="rounded-lg border bg-white p-3.5 max-h-[320px] overflow-y-auto"
+                style={{ borderColor: "var(--border-strong)" }}
+              >
+                <pre className="whitespace-pre-wrap text-[12px] leading-relaxed text-[var(--text)] font-sans">
+                  {lead.conversation_history}
+                </pre>
+              </div>
+            </Field>
+          )}
 
           {/* Notes */}
           <Field label="Notes">

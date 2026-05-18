@@ -57,6 +57,8 @@ export type Lead = {
   deal_size_annual: number | null;
   call_recording_url: string | null;
   notes: string | null;
+  campaign_name: string | null;
+  conversation_history: string | null;
 };
 
 export type Client = {
