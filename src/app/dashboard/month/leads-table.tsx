@@ -94,7 +94,7 @@ export default function LeadsTable({
               <tr className="text-left">
                 {(prMode
                   ? ["Source", "Name", "Company", "Email", "Phone", "Replied On", "Notes"]
-                  : ["Status", "Name", "Company", "Email", "Call Scheduled For", "Upfront", "MRR", "Recording", "Notes"]
+                  : ["Status", "Name", "Company", "Email", "Call Booked On", "Call Booked For", "Upfront", "MRR", "Recording", "Notes"]
                 ).map((h) => (
                   <th
                     key={h}
@@ -109,7 +109,7 @@ export default function LeadsTable({
             <tbody>
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="px-6 py-16 text-center text-[var(--muted)]">
+                  <td colSpan={10} className="px-6 py-16 text-center text-[var(--muted)]">
                     {leads.length === 0
                       ? "No leads booked this month yet."
                       : "No leads match this filter."}
@@ -180,6 +180,9 @@ export default function LeadsTable({
                     ) : (
                       <>
                         <td className="px-4 py-2.5 whitespace-nowrap tabular">{fmtDate(l.date_of_meeting)}</td>
+                        <td className="px-4 py-2.5 whitespace-nowrap tabular">
+                          {l.call_scheduled_for ? fmtDateOnly(l.call_scheduled_for) : <span className="text-[var(--border-strong)]">—</span>}
+                        </td>
                         <td className="px-4 py-2.5 whitespace-nowrap tabular text-right">
                           {Number(l.upfront_collected ?? 0) > 0 ? `$${Number(l.upfront_collected).toLocaleString()}` : <span className="text-[var(--border-strong)]"></span>}
                         </td>
@@ -291,5 +294,18 @@ function fmtDate(d: string | null) {
     day: "numeric",
     hour: "numeric",
     minute: "2-digit",
+  });
+}
+
+// Date-only value (e.g. "2026-05-05"). Format without timezone conversion so
+// the calendar date never shifts based on the viewer's locale.
+function fmtDateOnly(d: string | null) {
+  if (!d) return "";
+  const [y, m, day] = d.slice(0, 10).split("-").map(Number);
+  if (!y || !m || !day) return d;
+  return new Date(y, m - 1, day).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
   });
 }

@@ -54,6 +54,7 @@ export type Lead = {
   phone: string | null;
   created_date: string;
   date_of_meeting: string | null;
+  call_scheduled_for: string | null;
   upfront_collected: number | null;
   mrr_collected: number | null;
   deal_size_monthly: number | null;

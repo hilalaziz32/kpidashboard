@@ -163,7 +163,7 @@ export default function PipelineView({
               <tr className="text-left">
                 {[
                   "Status", "Name", "Company", "Email",
-                  "Call Scheduled For", "Upfront", "MRR", "Recording", "Notes",
+                  "Call Booked On", "Call Booked For", "Upfront", "MRR", "Recording", "Notes",
                 ].map((h) => (
                   <th
                     key={h}
@@ -178,7 +178,7 @@ export default function PipelineView({
             <tbody>
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="px-6 py-16 text-center text-[var(--muted)]">
+                  <td colSpan={10} className="px-6 py-16 text-center text-[var(--muted)]">
                     No leads match this filter.
                   </td>
                 </tr>
@@ -209,6 +209,9 @@ export default function PipelineView({
                     </td>
                     <td className="px-4 py-2.5 whitespace-nowrap text-[var(--text)]">{l.email}</td>
                     <td className="px-4 py-2.5 whitespace-nowrap tabular">{fmtDate(l.date_of_meeting)}</td>
+                    <td className="px-4 py-2.5 whitespace-nowrap tabular">
+                      {l.call_scheduled_for ? fmtDateOnly(l.call_scheduled_for) : <span className="text-[var(--border-strong)]">—</span>}
+                    </td>
                     <td className="px-4 py-2.5 whitespace-nowrap tabular text-right">
                       {Number(l.upfront_collected ?? 0) > 0 ? `$${Number(l.upfront_collected).toLocaleString()}` : <span className="text-[var(--border-strong)]"></span>}
                     </td>
@@ -298,5 +301,17 @@ function fmtDate(d: string | null) {
     year: "numeric",
     hour: "numeric",
     minute: "2-digit",
+  });
+}
+
+// Date-only value (e.g. "2026-05-05") — format without timezone shift.
+function fmtDateOnly(d: string | null) {
+  if (!d) return "";
+  const [y, m, day] = d.slice(0, 10).split("-").map(Number);
+  if (!y || !m || !day) return d;
+  return new Date(y, m - 1, day).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
   });
 }

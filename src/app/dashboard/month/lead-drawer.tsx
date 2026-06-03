@@ -148,9 +148,10 @@ export default function LeadDrawer({
             <Meta label="Phone" value={lead.phone} />
             <Meta label="Website" value={lead.website} link />
             <Meta label="Created Date" value={fmtDate(lead.created_date)} />
+            <Meta label="Call Booked On" value={fmtDate(lead.date_of_meeting)} />
             <Meta
-              label="Call Scheduled For"
-              value={fmtDate(lead.date_of_meeting)}
+              label="Call Booked For"
+              value={fmtDateOnly(lead.call_scheduled_for)}
               wide
             />
           </div>
@@ -376,5 +377,17 @@ function fmtDate(d: string | null) {
     year: "numeric",
     hour: "numeric",
     minute: "2-digit",
+  });
+}
+
+// Date-only value (e.g. "2026-05-05") — format without timezone shift.
+function fmtDateOnly(d: string | null) {
+  if (!d) return null;
+  const [y, m, day] = d.slice(0, 10).split("-").map(Number);
+  if (!y || !m || !day) return d;
+  return new Date(y, m - 1, day).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
   });
 }
