@@ -48,6 +48,7 @@ export default function TenantsTable({ clients }: { clients: TenantRow[] }) {
             <tr>
               {[
                 { label: "Name", align: "left" },
+                { label: "ID (UUID)", align: "left" },
                 { label: "Slug", align: "left" },
                 { label: "Meeting Target", align: "right" },
                 { label: "Default Deal $/mo", align: "right" },
@@ -83,6 +84,9 @@ export default function TenantsTable({ clients }: { clients: TenantRow[] }) {
                     <span className="ml-2 text-[11px] text-[var(--muted)]">saving…</span>
                   )}
                 </td>
+                <td className="px-4 py-2.5">
+                  <CopyId id={r.id} />
+                </td>
                 <td className="px-4 py-2.5 text-[var(--muted)] tabular text-[12px]">
                   {r.slug}
                 </td>
@@ -116,6 +120,25 @@ export default function TenantsTable({ clients }: { clients: TenantRow[] }) {
         </table>
       </div>
     </div>
+  );
+}
+
+function CopyId({ id }: { id: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      onClick={async () => {
+        await navigator.clipboard.writeText(id);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1200);
+      }}
+      title="Click to copy UUID"
+      className="group inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-[11px] tabular text-[var(--muted)] hover:text-[var(--ink)] transition"
+      style={{ borderColor: "var(--border)" }}
+    >
+      <span>{id.slice(0, 8)}…{id.slice(-4)}</span>
+      <span className="text-[10px] text-[var(--violet)]">{copied ? "✓" : "copy"}</span>
+    </button>
   );
 }
 

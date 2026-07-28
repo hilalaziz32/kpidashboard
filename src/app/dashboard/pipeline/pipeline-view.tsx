@@ -5,9 +5,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Lead, LEAD_STATUSES, LeadStatus, STATUS_LABEL } from "@/lib/types";
 import LeadDrawer from "../month/lead-drawer";
+import { pushDealStage } from "../lead-actions";
 
 const STATUS_STYLE: Record<LeadStatus, { bg: string; fg: string; dot: string }> = {
   "meeting booked":    { bg: "#F1F1F5", fg: "#3F3D56", dot: "#94A3B8" },
+  rescheduled:         { bg: "#E0E7FF", fg: "#3730A3", dot: "#6366F1" },
   show:                { bg: "#E0F2FE", fg: "#075985", dot: "#0EA5E9" },
   "no show":           { bg: "#FEE2E6", fg: "#9F1239", dot: "#F43F5E" },
   "not closed":        { bg: "#FEE7E2", fg: "#9A3412", dot: "#F97316" },
@@ -16,6 +18,7 @@ const STATUS_STYLE: Record<LeadStatus, { bg: string; fg: string; dot: string }> 
   "verbal agreement":  { bg: "#CFFAFE", fg: "#155E75", dot: "#06B6D4" },
   won:                 { bg: "#D1FAE5", fg: "#065F46", dot: "#10B981" },
   lost:                { bg: "#E5E7EB", fg: "#374151", dot: "#6B7280" },
+  post_meeting_lost:   { bg: "#FAE8FF", fg: "#86198F", dot: "#C026D3" },
 };
 
 export default function PipelineView({
@@ -66,8 +69,9 @@ export default function PipelineView({
 
   const counts = useMemo(() => {
     const c: Record<LeadStatus, number> = {
-      "meeting booked": 0, show: 0, "no show": 0, "not closed": 0,
+      "meeting booked": 0, rescheduled: 0, show: 0, "no show": 0, "not closed": 0,
       "next stage": 0, "proposal sent": 0, "verbal agreement": 0, won: 0, lost: 0,
+      post_meeting_lost: 0,
     };
     leads.forEach((l) => c[l.status]++);
     return c;
@@ -85,6 +89,12 @@ export default function PipelineView({
     if (error) {
       alert(`Update failed: ${error.message}`);
       router.refresh();
+      return;
+    }
+    // Mirror status changes back to Airtable (source of truth).
+    if (patch.status) {
+      const res = await pushDealStage(id, patch.status);
+      if (!res.ok) alert(`Saved locally, but Airtable sync failed: ${res.error}`);
     }
   }
 

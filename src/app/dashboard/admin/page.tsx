@@ -4,6 +4,7 @@ import AdminTabs from "./admin-tabs";
 import InviteForm from "./invite-form";
 import MembersList from "./members-list";
 import TenantsTable from "./tenants-table";
+import AddTenantForm from "./add-tenant-form";
 
 export default async function AdminPage({
   searchParams,
@@ -59,7 +60,12 @@ export default async function AdminPage({
 
       <AdminTabs active={active} />
 
-      {active === "tenants" && <TenantsTable clients={clients ?? []} />}
+      {active === "tenants" && (
+        <div className="space-y-4">
+          <AddTenantForm />
+          <TenantsTable clients={clients ?? []} />
+        </div>
+      )}
 
       {active === "members" && (
         <MembersList

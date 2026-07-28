@@ -3,6 +3,7 @@ import { computeKpis, fmtMoney, fmtPct, MONTH_NAMES } from "@/lib/kpi";
 import { Client, Lead } from "@/lib/types";
 import LeadsTable from "./leads-table";
 import MonthSwitcher from "./month-switcher";
+import SyncButton from "./sync-button";
 import CategoryTabs from "./category-tabs";
 import { getActiveTenant } from "@/lib/active-tenant";
 
@@ -91,7 +92,10 @@ export default async function MonthPage({
             <span className="text-[var(--violet)]">{year}</span>
           </h1>
         </div>
-        <MonthSwitcher year={year} month={month} />
+        <div className="flex items-center gap-3">
+          <SyncButton />
+          <MonthSwitcher year={year} month={month} />
+        </div>
       </div>
 
       {/* Compact KPI strip */}

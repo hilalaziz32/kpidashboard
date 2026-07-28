@@ -1,5 +1,6 @@
 export type LeadStatus =
   | "meeting booked"
+  | "rescheduled"
   | "show"
   | "no show"
   | "not closed"
@@ -7,10 +8,12 @@ export type LeadStatus =
   | "proposal sent"
   | "verbal agreement"
   | "won"
-  | "lost";
+  | "lost"
+  | "post_meeting_lost";
 
 export const LEAD_STATUSES: LeadStatus[] = [
   "meeting booked",
+  "rescheduled",
   "no show",
   "not closed",
   "show",
@@ -19,10 +22,12 @@ export const LEAD_STATUSES: LeadStatus[] = [
   "verbal agreement",
   "won",
   "lost",
+  "post_meeting_lost",
 ];
 
 export const STATUS_LABEL: Record<LeadStatus, string> = {
   "meeting booked": "Meeting Booked",
+  rescheduled: "Rescheduled",
   show: "Show",
   "no show": "No Show",
   "not closed": "Unqualified",
@@ -31,6 +36,7 @@ export const STATUS_LABEL: Record<LeadStatus, string> = {
   "verbal agreement": "Verbal Agreement",
   won: "Won",
   lost: "Lost",
+  post_meeting_lost: "Post Meeting Lost",
 };
 
 export type LeadCategory = "meeting" | "pr";
