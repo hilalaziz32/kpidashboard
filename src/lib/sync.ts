@@ -105,7 +105,15 @@ export function currentMonthPT(now = new Date()): string {
 async function fetchDealsCreatedInMonth(yyyymm: string): Promise<Deal[]> {
   const key = process.env.AIRTABLE_API_KEY;
   if (!key) throw new Error("AIRTABLE_API_KEY not set");
-  const formula = `DATETIME_FORMAT(SET_TIMEZONE({Date created},'America/Los_Angeles'),'YYYY-MM')='${yyyymm}'`;
+  // Match on EITHER date: a deal created last month can have its meeting this
+  // month (and vice versa). The dashboard's monthly view filters by
+  // date_of_meeting, so matching only "Date created" would miss rows that are
+  // visible on screen.
+  // The IF() guard matters: DATETIME_FORMAT on a blank date errors, and an
+  // error inside OR() drops the record entirely — silently losing rows.
+  const inMonth = (field: string) =>
+    `IF({${field}},DATETIME_FORMAT(SET_TIMEZONE({${field}},'America/Los_Angeles'),'YYYY-MM')='${yyyymm}',FALSE())`;
+  const formula = `OR(${inMonth("Date created")},${inMonth("Date of Meeting Booked")})`;
 
   const deals: Deal[] = [];
   let offset: string | undefined;
@@ -136,10 +144,14 @@ export type MonthSyncSummary = {
   clientId?: string;
 };
 
-// Sync current-month deals. Pass a clientId to limit to one tenant (the button);
-// omit it to sync every client (the cron).
-export async function syncCurrentMonth(clientId?: string): Promise<MonthSyncSummary> {
-  const month = currentMonthPT();
+// Sync one month's deals. Pass a clientId to limit to one tenant (the button);
+// omit it to sync every client (the cron). `yyyymm` defaults to the current
+// month — the button passes the month currently being viewed.
+export async function syncCurrentMonth(
+  clientId?: string,
+  yyyymm?: string
+): Promise<MonthSyncSummary> {
+  const month = yyyymm ?? currentMonthPT();
   const deals = await fetchDealsCreatedInMonth(month);
 
   const rows: Record<string, unknown>[] = [];

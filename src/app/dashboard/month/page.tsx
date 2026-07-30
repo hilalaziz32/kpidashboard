@@ -93,7 +93,7 @@ export default async function MonthPage({
           </h1>
         </div>
         <div className="flex items-center gap-3">
-          <SyncButton />
+          <SyncButton year={year} month={month} />
           <MonthSwitcher year={year} month={month} />
         </div>
       </div>

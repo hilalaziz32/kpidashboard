@@ -4,15 +4,24 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { syncActiveClientMonth } from "../lead-actions";
 
-export default function SyncButton() {
+export default function SyncButton({
+  year,
+  month,
+}: {
+  year: number;
+  month: number;
+}) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
 
+  // Sync the month currently on screen, not just today's month.
+  const yyyymm = `${year}-${String(month).padStart(2, "0")}`;
+
   function run() {
     setMsg(null);
     start(async () => {
-      const res = await syncActiveClientMonth();
+      const res = await syncActiveClientMonth(yyyymm);
       if (res.ok) {
         const s = res.summary;
         setMsg({ kind: "ok", text: `Synced ${s.upserted} deal${s.upserted === 1 ? "" : "s"} (${s.month})` });

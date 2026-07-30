@@ -11,17 +11,16 @@ export type SyncMonthResult =
   | { ok: true; summary: MonthSyncSummary }
   | { ok: false; error: string };
 
-// "Sync deals" button — pulls the active client's CURRENT-MONTH deals from
-// Airtable and upserts them. Admin-only.
-export async function syncActiveClientMonth(): Promise<SyncMonthResult> {
+// "Sync deals" button — pulls the active client's deals for the month being
+// viewed (defaults to the current month) from Airtable and upserts them.
+export async function syncActiveClientMonth(
+  yyyymm?: string
+): Promise<SyncMonthResult> {
   const active = await getActiveTenant();
   if (!active) return { ok: false, error: "Not authenticated." };
   if (!active.clientId) return { ok: false, error: "No client selected." };
-  if (!active.isAdmin) {
-    // Non-admins are scoped to their own client; still allow syncing it.
-  }
   try {
-    const summary = await syncCurrentMonth(active.clientId);
+    const summary = await syncCurrentMonth(active.clientId, yyyymm);
     revalidatePath("/dashboard/month");
     revalidatePath("/dashboard");
     return { ok: true, summary };
