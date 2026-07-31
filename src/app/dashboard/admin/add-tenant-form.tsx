@@ -7,7 +7,12 @@ import { createTenant, type CreateTenantResult } from "./actions";
 export default function AddTenantForm() {
   const router = useRouter();
   const [pending, start] = useTransition();
-  const [created, setCreated] = useState<{ id: string; name: string } | null>(null);
+  const [created, setCreated] = useState<{
+    id: string;
+    name: string;
+    linked: boolean;
+    linkError?: string;
+  } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -20,7 +25,12 @@ export default function AddTenantForm() {
     start(async () => {
       const res: CreateTenantResult = await createTenant(fd);
       if (res.ok) {
-        setCreated({ id: res.id, name: res.name });
+        setCreated({
+          id: res.id,
+          name: res.name,
+          linked: res.linked,
+          linkError: res.linkError,
+        });
         form.reset();
         router.refresh();
       } else {
@@ -106,6 +116,16 @@ export default function AddTenantForm() {
           >
             {copied ? "Copied ✓" : "Copy"}
           </button>
+          <span className="w-full text-[11px]">
+            {created.linked ? (
+              <>✓ Written to Airtable → Clients → <span className="tabular">DashboardID</span>. Deals will sync.</>
+            ) : (
+              <span style={{ color: "#92400E" }}>
+                ⚠ Not linked in Airtable ({created.linkError}). Paste the UUID into
+                that client&apos;s <span className="tabular">DashboardID</span> manually, or deals won&apos;t sync.
+              </span>
+            )}
+          </span>
         </div>
       )}
     </div>

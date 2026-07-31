@@ -24,8 +24,12 @@ export async function proxy(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
   const isAuthRoute = path.startsWith("/login") || path.startsWith("/auth");
+  // API routes authenticate themselves with a shared secret (SYNC_SECRET /
+  // CRON_SECRET). They must never be redirected to /login, or external callers
+  // (n8n, cron) get a 307 to the login page instead of running.
+  const isApiRoute = path.startsWith("/api/");
 
-  if (!user && !isAuthRoute) {
+  if (!user && !isAuthRoute && !isApiRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);

@@ -6,6 +6,9 @@ import { LeadStatus } from "./types";
 
 export const BASE_ID = "appgezzL6Uqr0xgBa";
 export const DEALS_TABLE_ID = "tblpcwgO0EguL7K98";
+// The Clients table — note there are several client-ish tables in the base;
+// this is the one whose DashboardID drives the sync (Deals link to it).
+export const CLIENTS_TABLE_ID = "tbl2yIyegDzYARc5X";
 const STAGE_FIELD = "Pipeline stage";
 
 // Reverse of STATUS_TO_STAGE: Airtable "Pipeline stage" → Supabase lead_status.
@@ -101,6 +104,49 @@ export async function updateDealStage(
   const stage = STATUS_TO_STAGE[status];
   if (!stage) return { ok: false, error: `No Airtable stage mapped for "${status}"` };
   return patchDeal(airtableRecordId, { [STAGE_FIELD]: stage });
+}
+
+// Write a newly-created Supabase client id into the matching Airtable Clients
+// record's DashboardID. That field is what links Deals to a dashboard tenant —
+// without it, a client's deals never sync. Matched on exact "Client Name".
+export async function linkClientDashboardId(
+  clientName: string,
+  uuid: string
+): Promise<AirtableWriteResult & { recordId?: string }> {
+  const key = process.env.AIRTABLE_API_KEY;
+  if (!key) return { ok: false, error: "AIRTABLE_API_KEY not set" };
+
+  const escaped = clientName.replace(/'/g, "\\'");
+  const url = new URL(`https://api.airtable.com/v0/${BASE_ID}/${CLIENTS_TABLE_ID}`);
+  url.searchParams.set("filterByFormula", `{Client Name}='${escaped}'`);
+  url.searchParams.set("maxRecords", "1");
+
+  const findRes = await fetch(url, {
+    headers: { Authorization: `Bearer ${key}` },
+    cache: "no-store",
+  });
+  if (!findRes.ok) {
+    return { ok: false, error: `Airtable lookup ${findRes.status}` };
+  }
+  const found = (await findRes.json()) as { records?: { id: string }[] };
+  const recordId = found.records?.[0]?.id;
+  if (!recordId) {
+    return { ok: false, error: `No Airtable client named "${clientName}"` };
+  }
+
+  const res = await fetch(
+    `https://api.airtable.com/v0/${BASE_ID}/${CLIENTS_TABLE_ID}/${recordId}`,
+    {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ fields: { DashboardID: uuid } }),
+    }
+  );
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    return { ok: false, error: `Airtable ${res.status}: ${text.slice(0, 200)}` };
+  }
+  return { ok: true, recordId };
 }
 
 // Mirror dashboard-edited post-meeting fields back to Airtable, so the sync

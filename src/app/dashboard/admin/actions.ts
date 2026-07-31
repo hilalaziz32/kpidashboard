@@ -3,9 +3,18 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { linkClientDashboardId } from "@/lib/airtable";
 
 export type CreateTenantResult =
-  | { ok: true; id: string; name: string; slug: string }
+  | {
+      ok: true;
+      id: string;
+      name: string;
+      slug: string;
+      // Whether the id was written into Airtable's Clients.DashboardID.
+      linked: boolean;
+      linkError?: string;
+    }
   | { ok: false; error: string };
 
 function slugify(input: string) {
@@ -56,6 +65,18 @@ export async function createTenant(formData: FormData): Promise<CreateTenantResu
     return { ok: false, error: msg };
   }
 
+  // Push the new id into Airtable so this client's deals start syncing. The
+  // tenant already exists at this point, so a link failure is reported rather
+  // than treated as a failed creation.
+  const link = await linkClientDashboardId(data.name, data.id);
+
   revalidatePath("/dashboard/admin");
-  return { ok: true, id: data.id, name: data.name, slug: data.slug };
+  return {
+    ok: true,
+    id: data.id,
+    name: data.name,
+    slug: data.slug,
+    linked: link.ok,
+    ...(link.ok ? {} : { linkError: link.error }),
+  };
 }

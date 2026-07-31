@@ -70,6 +70,56 @@ async function upsertRows(rows: Record<string, unknown>[]) {
     .upsert(rows, { onConflict: "client_id,airtable_record_id" });
 }
 
+// Bulk upsert, falling back to row-by-row if the batch fails, so one problem
+// row can't abort the whole sync.
+//
+// Leads are unique per (client_id, email): the same person may appear under two
+// different clients, but only once within a client. Airtable sometimes holds
+// two Deals for the same person under one client (re-entered later). When that
+// happens the insert trips leads_client_email_uniq, so we merge the incoming
+// deal into the existing lead — repointing airtable_record_id at the newer
+// record — instead of failing.
+async function upsertResilient(
+  rows: Record<string, unknown>[]
+): Promise<{ upserted: number; merged: number; failed: { id: string; reason: string }[] }> {
+  if (!rows.length) return { upserted: 0, merged: 0, failed: [] };
+
+  const { error } = await upsertRows(rows);
+  if (!error) return { upserted: rows.length, merged: 0, failed: [] };
+
+  const admin = createAdminClient();
+  const failed: { id: string; reason: string }[] = [];
+  let upserted = 0;
+  let merged = 0;
+
+  for (const row of rows) {
+    const { error: rowErr } = await upsertRows([row]);
+    if (!rowErr) {
+      upserted++;
+      continue;
+    }
+
+    const isEmailClash =
+      rowErr.code === "23505" && rowErr.message.includes("leads_client_email_uniq");
+    if (isEmailClash && row.email) {
+      const { error: mergeErr } = await admin
+        .from("leads")
+        .update(row)
+        .eq("client_id", row.client_id as string)
+        .eq("email", row.email as string);
+      if (!mergeErr) {
+        merged++;
+        continue;
+      }
+      failed.push({ id: String(row.airtable_record_id ?? "?"), reason: mergeErr.message });
+      continue;
+    }
+
+    failed.push({ id: String(row.airtable_record_id ?? "?"), reason: rowErr.message });
+  }
+  return { upserted, merged, failed };
+}
+
 // --- Single-record path (n8n webhook) ------------------------------------
 export async function syncRecordIds(ids: string[]): Promise<SyncOutcome[]> {
   const out: SyncOutcome[] = [];
@@ -148,6 +198,8 @@ export type MonthSyncSummary = {
   fetched: number;
   upserted: number;
   skipped: number;
+  merged?: number;
+  failed?: { id: string; reason: string }[];
   clientId?: string;
 };
 
@@ -173,8 +225,15 @@ export async function syncCurrentMonth(
     rows.push(mapped.row);
   }
 
-  const { error } = await upsertRows(rows);
-  if (error) throw new Error(error.message);
+  const { upserted, merged, failed } = await upsertResilient(rows);
 
-  return { month, fetched: deals.length, upserted: rows.length, skipped, clientId };
+  return {
+    month,
+    fetched: deals.length,
+    upserted,
+    skipped,
+    clientId,
+    ...(merged ? { merged } : {}),
+    ...(failed.length ? { failed } : {}),
+  };
 }
