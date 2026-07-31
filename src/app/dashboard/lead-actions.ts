@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { updateDealStage } from "@/lib/airtable";
+import { updateDealStage, updateDealNotes } from "@/lib/airtable";
 import { syncCurrentMonth, type MonthSyncSummary } from "@/lib/sync";
 import { getActiveTenant } from "@/lib/active-tenant";
 import { LeadStatus } from "@/lib/types";
@@ -61,4 +61,30 @@ export async function pushDealStage(
   }
 
   return updateDealStage(lead.airtable_record_id, status);
+}
+
+// Mirror dashboard-edited notes / recording link back to Airtable so the next
+// sync (which pulls Notes + Recordings) doesn't overwrite them.
+export async function pushDealNotes(
+  leadId: string,
+  fields: { notes?: string | null; call_recording_url?: string | null }
+): Promise<PushStageResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Not authenticated." };
+
+  const { data: lead, error } = await supabase
+    .from("leads")
+    .select("airtable_record_id")
+    .eq("id", leadId)
+    .single();
+
+  if (error) return { ok: false, error: error.message };
+  if (!lead?.airtable_record_id) {
+    return { ok: false, error: "Lead has no airtable_record_id — nothing to sync." };
+  }
+
+  return updateDealNotes(lead.airtable_record_id, fields);
 }

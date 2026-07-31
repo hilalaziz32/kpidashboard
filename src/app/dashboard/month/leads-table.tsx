@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Lead, LEAD_STATUSES, LeadStatus, STATUS_LABEL, SOURCE_LABEL } from "@/lib/types";
 import { useRouter } from "next/navigation";
 import LeadDrawer from "./lead-drawer";
-import { pushDealStage } from "../lead-actions";
+import { pushDealStage, pushDealNotes } from "../lead-actions";
 
 const STATUS_STYLE: Record<LeadStatus, { bg: string; fg: string; dot: string }> = {
   "meeting booked":    { bg: "#F1F1F5", fg: "#3F3D56", dot: "#94A3B8" },
@@ -53,6 +53,15 @@ export default function LeadsTable({
     if (patch.status) {
       const res = await pushDealStage(id, patch.status);
       if (!res.ok) alert(`Saved locally, but Airtable sync failed: ${res.error}`);
+    }
+    if ("notes" in patch || "call_recording_url" in patch) {
+      const res = await pushDealNotes(id, {
+        ...("notes" in patch ? { notes: patch.notes } : {}),
+        ...("call_recording_url" in patch
+          ? { call_recording_url: patch.call_recording_url }
+          : {}),
+      });
+      if (!res.ok) alert(`Saved locally, but Airtable notes sync failed: ${res.error}`);
     }
   }
 

@@ -51,6 +51,13 @@ export function mapDealToRow(
       call_scheduled_for: first(f["Call Schedule For (Date)"]),
       conversation_history: first(f["Email conversation"]),
       campaign_name: first(f["campaignname"]),
+      // Post-meeting fields. Airtable is the source of truth: notes/recordings
+      // typed in the dashboard are written back to Airtable (see lead-actions),
+      // so pulling them here keeps both sides identical rather than clobbering.
+      // Keys are always present — PostgREST bulk upsert requires every object
+      // in the payload to have the same keys.
+      notes: first(f["Notes"]),
+      call_recording_url: first(f["Recordings"]),
     },
   };
 }

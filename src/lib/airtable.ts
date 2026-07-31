@@ -66,15 +66,14 @@ export type AirtableWriteResult =
   | { ok: true }
   | { ok: false; error: string };
 
-export async function updateDealStage(
+// Patch arbitrary fields on a Deal.
+async function patchDeal(
   airtableRecordId: string,
-  status: LeadStatus
+  fields: Record<string, unknown>
 ): Promise<AirtableWriteResult> {
   const key = process.env.AIRTABLE_API_KEY;
   if (!key) return { ok: false, error: "AIRTABLE_API_KEY not set" };
-
-  const stage = STATUS_TO_STAGE[status];
-  if (!stage) return { ok: false, error: `No Airtable stage mapped for "${status}"` };
+  if (!Object.keys(fields).length) return { ok: true };
 
   const res = await fetch(
     `https://api.airtable.com/v0/${BASE_ID}/${DEALS_TABLE_ID}/${airtableRecordId}`,
@@ -84,7 +83,7 @@ export async function updateDealStage(
         Authorization: `Bearer ${key}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ fields: { [STAGE_FIELD]: stage } }),
+      body: JSON.stringify({ fields }),
     }
   );
 
@@ -93,4 +92,26 @@ export async function updateDealStage(
     return { ok: false, error: `Airtable ${res.status}: ${text.slice(0, 200)}` };
   }
   return { ok: true };
+}
+
+export async function updateDealStage(
+  airtableRecordId: string,
+  status: LeadStatus
+): Promise<AirtableWriteResult> {
+  const stage = STATUS_TO_STAGE[status];
+  if (!stage) return { ok: false, error: `No Airtable stage mapped for "${status}"` };
+  return patchDeal(airtableRecordId, { [STAGE_FIELD]: stage });
+}
+
+// Mirror dashboard-edited post-meeting fields back to Airtable, so the sync
+// (which pulls Notes/Recordings) never overwrites what a client typed here.
+export async function updateDealNotes(
+  airtableRecordId: string,
+  fields: { notes?: string | null; call_recording_url?: string | null }
+): Promise<AirtableWriteResult> {
+  const patch: Record<string, unknown> = {};
+  if (fields.notes !== undefined) patch["Notes"] = fields.notes ?? "";
+  if (fields.call_recording_url !== undefined)
+    patch["Recordings"] = fields.call_recording_url ?? "";
+  return patchDeal(airtableRecordId, patch);
 }
