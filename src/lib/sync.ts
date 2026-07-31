@@ -14,7 +14,7 @@ import {
 
 export type SyncOutcome = {
   recordId: string;
-  status: "upserted" | "skipped" | "error";
+  status: "upserted" | "merged" | "skipped" | "error";
   reason?: string;
   leadStatus?: string;
 };
@@ -136,12 +136,18 @@ export async function syncRecordIds(ids: string[]): Promise<SyncOutcome[]> {
       out.push({ recordId: id, status: "skipped", reason: mapped.skip });
       continue;
     }
-    const { error } = await upsertRows([mapped.row]);
-    out.push(
-      error
-        ? { recordId: id, status: "error", reason: error.message }
-        : { recordId: id, status: "upserted", leadStatus: mapped.leadStatus }
-    );
+    // Same resilient path as the bulk sync, so a second Airtable deal for a
+    // person who already exists under the client merges instead of erroring.
+    const { upserted, merged, failed } = await upsertResilient([mapped.row]);
+    if (failed.length) {
+      out.push({ recordId: id, status: "error", reason: failed[0].reason });
+    } else {
+      out.push({
+        recordId: id,
+        status: merged ? "merged" : "upserted",
+        leadStatus: mapped.leadStatus,
+      });
+    }
   }
   return out;
 }
