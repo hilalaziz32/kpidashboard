@@ -57,7 +57,9 @@ export function mapDealToRow(
       // Keys are always present — PostgREST bulk upsert requires every object
       // in the payload to have the same keys.
       notes: first(f["Notes"]),
-      call_recording_url: first(f["Recordings"]),
+      // Recording links live in "Meeting URL" (Fathom). The "Recordings" field
+      // exists but is empty on every deal — mapping it here wiped call_recording_url.
+      call_recording_url: first(f["Meeting URL"]),
     },
   };
 }

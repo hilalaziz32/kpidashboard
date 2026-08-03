@@ -157,7 +157,9 @@ export async function updateDealNotes(
 ): Promise<AirtableWriteResult> {
   const patch: Record<string, unknown> = {};
   if (fields.notes !== undefined) patch["Notes"] = fields.notes ?? "";
+  // Recording links live in "Meeting URL" — must match what the sync reads,
+  // or a write-back would be invisible and then overwritten on the next pull.
   if (fields.call_recording_url !== undefined)
-    patch["Recordings"] = fields.call_recording_url ?? "";
+    patch["Meeting URL"] = fields.call_recording_url ?? "";
   return patchDeal(airtableRecordId, patch);
 }
