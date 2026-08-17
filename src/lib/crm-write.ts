@@ -6,13 +6,13 @@ import { LEAD_STATUSES, LeadStatus } from "@/lib/types";
 // Write plumbing for /api/crm/*. Kept separate from the read-only insights API
 // so the read token can be shared freely without granting write access.
 
-// Writes use their own token. Falls back to nothing — an unset CRM_WRITE_TOKEN
-// disables writes entirely rather than silently accepting the read token.
+// Same token as the read API — one credential for both, by design. Note this
+// means anyone holding it can edit, not just read.
 export function authorizeWrite(req: NextRequest): NextResponse | null {
-  const expected = process.env.CRM_WRITE_TOKEN;
+  const expected = process.env.INSIGHTS_TOKEN || process.env.SYNC_SECRET;
   if (!expected) {
     return NextResponse.json(
-      { error: "CRM_WRITE_TOKEN not configured — writes are disabled" },
+      { error: "INSIGHTS_TOKEN not configured on the server" },
       { status: 500 }
     );
   }

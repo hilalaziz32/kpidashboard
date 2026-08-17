@@ -11,8 +11,8 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({
     description:
-      "Write API for the clients-kpis CRM. Pair it with the read-only /api/insights endpoints, which use a different token.",
-    auth: "Authorization: Bearer <CRM_WRITE_TOKEN> (or ?token=). Separate from the insights read token.",
+      "Write API for the clients-kpis CRM. Pair it with the read-only /api/insights endpoints — both use the same token.",
+    auth: "Authorization: Bearer <INSIGHTS_TOKEN> (or ?token=). Same token as /api/insights.",
     endpoints: {
       "GET /api/crm/leads/:id": "Read one lead (useful before editing).",
       "PATCH /api/crm/leads/:id":
