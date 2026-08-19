@@ -1,24 +1,30 @@
 ---
 name: client-crm
-description: Query the Scaletopia client CRM dashboard (meetings, pipeline, funnel, revenue, outreach stats) via its read-only insights API. Use when asked about client performance, meetings booked, show rates, close rates, revenue/MRR, pipeline health, which clients are under target, or any question about leads and deals across clients.
+description: Read and edit the Scaletopia client CRM dashboard (meetings, pipeline, funnel, revenue, outreach stats). Use when asked about client performance, meetings booked, show rates, close rates, revenue/MRR, pipeline health, which clients are under target, or any question about leads and deals — and when asked to update a lead's status, revenue or notes, add or edit a client, or change a KPI target.
 ---
 
-# Client CRM — insights API
+# Client CRM
 
-Read-only access to the Scaletopia clients-kpis dashboard. Every endpoint is a
-GET, returns JSON, and never mutates data — safe to call freely.
+Two APIs on the same dashboard, sharing one token:
+
+- **`/api/insights`** — reading. GET only, never mutates, safe to call freely.
+- **`/api/crm`** — writing. Edits leads and clients.
 
 ## Access
 
 ```
-Base URL: https://clients.scaletopia.online/api/insights
-Header:   Authorization: Bearer insights_PWUzYeFT9bsS3hxXGLY27NEmspnlKfUQ
+Read base:  https://clients.scaletopia.online/api/insights
+Write base: https://clients.scaletopia.online/api/crm
+Header:     Authorization: Bearer insights_PWUzYeFT9bsS3hxXGLY27NEmspnlKfUQ
 ```
 
-`?token=<token>` also works if setting a header is awkward.
+`?token=<token>` also works if setting a header is awkward. The same token
+authenticates both, so a read call and an edit call look identical apart from
+the path and HTTP method.
 
 **Always call `GET /api/insights` first.** It self-documents every endpoint,
-filter and enum, so you never have to guess field names.
+filter and enum, so you never have to guess field names. `GET /api/crm` does
+the same for the write side.
 
 ```bash
 curl -H "Authorization: Bearer insights_PWUzYeFT9bsS3hxXGLY27NEmspnlKfUQ" \

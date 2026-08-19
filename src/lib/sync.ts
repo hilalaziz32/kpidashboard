@@ -51,6 +51,9 @@ export function mapDealToRow(
       call_scheduled_for: first(f["Call Schedule For (Date)"]),
       conversation_history: first(f["Email conversation"]),
       campaign_name: first(f["campaignname"]),
+      // Date the deal closed (Won/Lost), for monthly reporting. Stamped by the
+      // "Stamp Closed date" Airtable automation, or entered by hand.
+      closed_date: first(f["Closed date"]),
       // Post-meeting fields. Airtable is the source of truth: notes/recordings
       // typed in the dashboard are written back to Airtable (see lead-actions),
       // so pulling them here keeps both sides identical rather than clobbering.

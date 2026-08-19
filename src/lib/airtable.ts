@@ -153,9 +153,14 @@ export async function linkClientDashboardId(
 // (which pulls Notes/Recordings) never overwrites what a client typed here.
 export async function updateDealNotes(
   airtableRecordId: string,
-  fields: { notes?: string | null; call_recording_url?: string | null }
+  fields: {
+    notes?: string | null;
+    call_recording_url?: string | null;
+    closed_date?: string | null;
+  }
 ): Promise<AirtableWriteResult> {
   const patch: Record<string, unknown> = {};
+  if (fields.closed_date !== undefined) patch["Closed date"] = fields.closed_date ?? null;
   if (fields.notes !== undefined) patch["Notes"] = fields.notes ?? "";
   // Recording links live in "Meeting URL" — must match what the sync reads,
   // or a write-back would be invisible and then overwritten on the next pull.

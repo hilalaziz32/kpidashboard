@@ -36,7 +36,7 @@ const NUMERIC = [
   "deal_size_annual",
 ] as const;
 const TEXT = ["notes", "call_recording_url", "full_name", "company_name", "email", "phone", "website"] as const;
-const DATE = ["date_of_meeting", "call_scheduled_for", "created_date"] as const;
+const DATE = ["date_of_meeting", "call_scheduled_for", "created_date", "closed_date"] as const;
 
 export const EDITABLE = ["status", ...NUMERIC, ...TEXT, ...DATE] as const;
 
@@ -95,14 +95,18 @@ export async function mirrorToAirtable(
     if (r.ok) mirrored.push("Pipeline stage");
     else airtableError = r.error;
   }
-  if ("notes" in patch || "call_recording_url" in patch) {
+  const MIRRORED = ["notes", "call_recording_url", "closed_date"] as const;
+  if (MIRRORED.some((k) => k in patch)) {
     const r = await updateDealNotes(airtableRecordId, {
       ...("notes" in patch ? { notes: patch.notes as string | null } : {}),
       ...("call_recording_url" in patch
         ? { call_recording_url: patch.call_recording_url as string | null }
         : {}),
+      ...("closed_date" in patch
+        ? { closed_date: patch.closed_date as string | null }
+        : {}),
     });
-    if (r.ok) mirrored.push(...Object.keys(patch).filter((k) => k === "notes" || k === "call_recording_url"));
+    if (r.ok) mirrored.push(...MIRRORED.filter((k) => k in patch));
     else airtableError = r.error;
   }
   return { mirrored, airtableError };

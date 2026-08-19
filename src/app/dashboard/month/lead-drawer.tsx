@@ -152,8 +152,8 @@ export default function LeadDrawer({
             <Meta
               label="Call Booked For"
               value={fmtDateOnly(lead.call_scheduled_for)}
-              wide
             />
+            <Meta label="Closed Date" value={fmtDateOnly(lead.closed_date)} wide />
           </div>
 
           {/* Status */}
