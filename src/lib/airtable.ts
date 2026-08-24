@@ -26,7 +26,9 @@ export const STAGE_TO_STATUS: Record<string, LeadStatus> = {
   Lost: "lost",
   "Post Meeting Lost": "post_meeting_lost",
   Disqualified: "not closed", // UI labels "not closed" as "Unqualified"
+  // Airtable carries two future stages; both mean the same thing here.
   "Future Qualified": "future",
+  "Future Potential": "future",
 };
 
 // Pull one Deal record straight from Airtable (source of truth).
@@ -64,7 +66,7 @@ const STATUS_TO_STAGE: Record<LeadStatus, string> = {
   won: "Won",
   lost: "Lost",
   post_meeting_lost: "Post Meeting Lost",
-  future: "Future Qualified",
+  future: "Future Potential",
 };
 
 export type AirtableWriteResult =
