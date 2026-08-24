@@ -19,23 +19,21 @@ export type KpiSummary = {
 };
 
 export function computeKpis(leads: Lead[], now = new Date()): KpiSummary {
-  // "Booked" = every lead EXCEPT normal "lost" and "future" — neither became a
-  // real meeting. "lost" died before one happened; "future" is a lead parked for
-  // later. "post_meeting_lost" DID happen, so it still counts as booked.
-  const total = leads.filter(
-    (l) => l.status !== "lost" && l.status !== "future"
-  ).length;
+  // "Booked" = every lead EXCEPT normal "lost", which died before a meeting
+  // happened. "post_meeting_lost" and "future" both follow a real meeting
+  // (lost afterwards / worth revisiting later), so they still count as booked.
+  const total = leads.filter((l) => l.status !== "lost").length;
   const upcoming = leads.filter(
     (l) =>
       l.status === "meeting booked" &&
       l.date_of_meeting &&
       new Date(l.date_of_meeting) > now
   ).length;
-  // Anyone who actually showed up to a call. "post_meeting_lost" counts here
-  // (the meeting happened, then the deal was lost). Normal "lost" does NOT —
-  // it's treated as never having become a real meeting.
+  // Anyone who actually showed up to a call. "post_meeting_lost" and "future"
+  // count here — both follow a meeting that happened (lost afterwards / worth
+  // revisiting). Normal "lost" does NOT: it never became a real meeting.
   const shows = leads.filter((l) =>
-    ["show", "not closed", "next stage", "proposal sent", "verbal agreement", "won", "post_meeting_lost"].includes(l.status)
+    ["show", "not closed", "next stage", "proposal sent", "verbal agreement", "won", "post_meeting_lost", "future"].includes(l.status)
   ).length;
   const noShows = leads.filter((l) => l.status === "no show").length;
   // "not closed" is the DB value; UI labels it "Unqualified".

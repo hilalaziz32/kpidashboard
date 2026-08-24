@@ -26,8 +26,9 @@ export const STAGE_TO_STATUS: Record<string, LeadStatus> = {
   Lost: "lost",
   "Post Meeting Lost": "post_meeting_lost",
   Disqualified: "not closed", // UI labels "not closed" as "Unqualified"
-  // Airtable carries two future stages; both mean the same thing here.
-  "Future Qualified": "future",
+  // "Future Potential" is a POST-meeting outcome: the call happened and the lead
+  // is worth revisiting. Airtable's older "Future Qualified" is a pre-meeting
+  // stage, so it is deliberately not synced (like "Maybe" / "Positive Reply").
   "Future Potential": "future",
 };
 
