@@ -19,9 +19,12 @@ export type KpiSummary = {
 };
 
 export function computeKpis(leads: Lead[], now = new Date()): KpiSummary {
-  // "Booked" = every lead EXCEPT normal "lost" (those were lost before becoming
-  // a real meeting). "post_meeting_lost" DID happen, so it still counts as booked.
-  const total = leads.filter((l) => l.status !== "lost").length;
+  // "Booked" = every lead EXCEPT normal "lost" and "future" — neither became a
+  // real meeting. "lost" died before one happened; "future" is a lead parked for
+  // later. "post_meeting_lost" DID happen, so it still counts as booked.
+  const total = leads.filter(
+    (l) => l.status !== "lost" && l.status !== "future"
+  ).length;
   const upcoming = leads.filter(
     (l) =>
       l.status === "meeting booked" &&

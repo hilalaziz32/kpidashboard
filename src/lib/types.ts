@@ -9,7 +9,8 @@ export type LeadStatus =
   | "verbal agreement"
   | "won"
   | "lost"
-  | "post_meeting_lost";
+  | "post_meeting_lost"
+  | "future";
 
 export const LEAD_STATUSES: LeadStatus[] = [
   "meeting booked",
@@ -23,6 +24,7 @@ export const LEAD_STATUSES: LeadStatus[] = [
   "won",
   "lost",
   "post_meeting_lost",
+  "future",
 ];
 
 export const STATUS_LABEL: Record<LeadStatus, string> = {
@@ -37,6 +39,7 @@ export const STATUS_LABEL: Record<LeadStatus, string> = {
   won: "Won",
   lost: "Lost",
   post_meeting_lost: "Post Meeting Lost",
+  future: "Future Potential",
 };
 
 export type LeadCategory = "meeting" | "pr";

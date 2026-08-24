@@ -19,6 +19,7 @@ const STATUS_STYLE: Record<LeadStatus, { bg: string; fg: string; dot: string }> 
   won:                 { bg: "#D1FAE5", fg: "#065F46", dot: "#10B981" },
   lost:                { bg: "#E5E7EB", fg: "#374151", dot: "#6B7280" },
   post_meeting_lost:   { bg: "#FAE8FF", fg: "#86198F", dot: "#C026D3" },
+  future:              { bg: "#FEF9C3", fg: "#854D0E", dot: "#EAB308" },
 };
 
 export default function PipelineView({
@@ -71,7 +72,7 @@ export default function PipelineView({
     const c: Record<LeadStatus, number> = {
       "meeting booked": 0, rescheduled: 0, show: 0, "no show": 0, "not closed": 0,
       "next stage": 0, "proposal sent": 0, "verbal agreement": 0, won: 0, lost: 0,
-      post_meeting_lost: 0,
+      post_meeting_lost: 0, future: 0,
     };
     leads.forEach((l) => c[l.status]++);
     return c;
