@@ -54,6 +54,9 @@ export function mapDealToRow(
       // Date the deal closed (Won/Lost), for monthly reporting. Stamped by the
       // "Stamp Closed date" Airtable automation, or entered by hand.
       closed_date: first(f["Closed date"]),
+      // Why a lead was disqualified/lost — captured in the dashboard, stored in
+      // Airtable's "Not closed-reason-feedback", pulled back here for display.
+      dq_reason: first(f["Not closed-reason-feedback"]),
       // Post-meeting fields. Airtable is the source of truth: notes/recordings
       // typed in the dashboard are written back to Airtable (see lead-actions),
       // so pulling them here keeps both sides identical rather than clobbering.

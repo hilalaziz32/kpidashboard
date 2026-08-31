@@ -80,6 +80,7 @@ export type Lead = {
   date_of_meeting: string | null;
   call_scheduled_for: string | null;
   closed_date: string | null;
+  dq_reason: string | null;
   upfront_collected: number | null;
   mrr_collected: number | null;
   deal_size_monthly: number | null;

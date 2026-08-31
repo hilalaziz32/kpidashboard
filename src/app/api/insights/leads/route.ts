@@ -12,6 +12,7 @@ const SLIM = [
   "date_of_meeting",
   "call_scheduled_for",
   "closed_date",
+  "dq_reason",
   "upfront_collected",
   "mrr_collected",
 ] as const;

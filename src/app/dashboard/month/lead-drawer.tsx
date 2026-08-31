@@ -20,7 +20,7 @@ export default function LeadDrawer({
 }) {
   const [status, setStatus] = useState<LeadStatus>(lead.status);
   // A negative outcome cannot be saved without a written reason.
-  const [dqReason, setDqReason] = useState("");
+  const [dqReason, setDqReason] = useState(lead.dq_reason ?? "");
   const [upfront, setUpfront] = useState(
     lead.upfront_collected ? String(lead.upfront_collected) : ""
   );
@@ -170,7 +170,8 @@ export default function LeadDrawer({
               label="Call Booked For"
               value={fmtDateOnly(lead.call_scheduled_for)}
             />
-            <Meta label="Closed Date" value={fmtDateOnly(lead.closed_date)} wide />
+            <Meta label="Closed Date" value={fmtDateOnly(lead.closed_date)} />
+            <Meta label="Reason" value={lead.dq_reason} wide />
           </div>
 
           {/* Status */}
