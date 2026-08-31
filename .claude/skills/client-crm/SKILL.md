@@ -76,10 +76,15 @@ Read this before interpreting numbers — several statuses behave unintuitively.
   won, post_meeting_lost.
 - **Revenue is only counted on status `won`** (`upfront_collected`, `mrr_collected`).
 - The status `not closed` is labelled **"Unqualified"** in the UI.
+- **`dq_reason`** is the free-text reason a lead was disqualified. The dashboard
+  requires it whenever someone moves a lead to `not closed`, `lost` or
+  `post_meeting_lost`. It lives in Airtable's "Not closed-reason-feedback"
+  field; setting it via the API mirrors it there, so do not leave it blank when
+  setting one of those three statuses.
 - `closingRate` = won ÷ proposalsSent (not ÷ booked). `showRate` = shows ÷ booked.
 
 Statuses: `meeting booked`, `rescheduled`, `show`, `no show`, `not closed`,
-`next stage`, `proposal sent`, `verbal agreement`, `won`, `lost`, `post_meeting_lost`.
+`next stage`, `proposal sent`, `verbal agreement`, `won`, `lost`, `post_meeting_lost`, `future`.
 
 Categories: `meeting` (sales calls) and `pr` (positive replies). KPI endpoints
 count `meeting` only; use `/leads?category=pr` for outreach replies.
