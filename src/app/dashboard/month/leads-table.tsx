@@ -2,10 +2,11 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { Lead, LEAD_STATUSES, LeadStatus, STATUS_LABEL, SOURCE_LABEL } from "@/lib/types";
+import { Lead, LEAD_STATUSES, LeadStatus, STATUS_LABEL, SOURCE_LABEL , requiresReason } from "@/lib/types";
 import { useRouter } from "next/navigation";
+import ReasonPrompt from "./reason-prompt";
 import LeadDrawer from "./lead-drawer";
-import { pushDealStage, pushDealNotes } from "../lead-actions";
+import { pushDealStage, pushDealNotes, pushDealStatusWithReason } from "../lead-actions";
 
 const STATUS_STYLE: Record<LeadStatus, { bg: string; fg: string; dot: string }> = {
   "meeting booked":    { bg: "#F1F1F5", fg: "#3F3D56", dot: "#94A3B8" },
@@ -34,6 +35,7 @@ export default function LeadsTable({
   const [leads, setLeads] = useState(initial);
   const [filter, setFilter] = useState<LeadStatus | "all">("all");
   const [openLeadId, setOpenLeadId] = useState<string | null>(null);
+  const [pendingDq, setPendingDq] = useState<{ id: string; status: LeadStatus } | null>(null);
   const [pending, start] = useTransition();
   const router = useRouter();
   const supabase = createClient();
@@ -152,9 +154,13 @@ export default function LeadsTable({
                         <div className="relative inline-block">
                           <select
                             value={l.status}
-                            onChange={(e) =>
-                              patchLead(l.id, { status: e.target.value as LeadStatus })
-                            }
+                            onChange={(e) => {
+                              const next = e.target.value as LeadStatus;
+                              // Negative outcomes need a written reason, so hold
+                              // the change until the prompt is filled in.
+                              if (requiresReason(next)) setPendingDq({ id: l.id, status: next });
+                              else patchLead(l.id, { status: next });
+                            }}
                             className="appearance-none cursor-pointer rounded-full text-[11px] font-medium pl-7 pr-8 py-1.5 border-0 outline-none focus:ring-2 focus:ring-[var(--violet-200)]"
                             style={{ background: s.bg, color: s.fg }}
                           >
@@ -241,6 +247,25 @@ export default function LeadsTable({
         </div>
         {pending && <div className="px-5 py-2 text-[11px] text-[var(--muted)] border-t" style={{ borderColor: "var(--border)" }}>Saving…</div>}
       </div>
+
+      {pendingDq && (
+        <ReasonPrompt
+          leadName={leads.find((l) => l.id === pendingDq.id)?.full_name ?? null}
+          status={pendingDq.status}
+          onCancel={() => setPendingDq(null)}
+          onConfirm={async (reason) => {
+            const { id, status } = pendingDq;
+            const res = await pushDealStatusWithReason(id, status, reason);
+            if (!res.ok) {
+              alert(`Could not save: ${res.error}`);
+              return;
+            }
+            setLeads((ls) => ls.map((l) => (l.id === id ? { ...l, status } : l)));
+            await supabase.from("leads").update({ status }).eq("id", id);
+            setPendingDq(null);
+          }}
+        />
+      )}
 
       {openLead && (
         <LeadDrawer

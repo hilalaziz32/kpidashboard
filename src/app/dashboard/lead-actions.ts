@@ -63,6 +63,38 @@ export async function pushDealStage(
   return updateDealStage(lead.airtable_record_id, status);
 }
 
+// Set a lead's status AND its disqualification reason in one call. Used when a
+// negative status is chosen: the reason is mandatory, so both must land together
+// rather than leaving a disqualification in Airtable with no explanation.
+export async function pushDealStatusWithReason(
+  leadId: string,
+  status: LeadStatus,
+  reason: string
+): Promise<PushStageResult> {
+  const trimmed = reason.trim();
+  if (!trimmed) return { ok: false, error: "A reason is required." };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Not authenticated." };
+
+  const { data: lead, error } = await supabase
+    .from("leads")
+    .select("airtable_record_id")
+    .eq("id", leadId)
+    .single();
+  if (error) return { ok: false, error: error.message };
+  if (!lead?.airtable_record_id) {
+    return { ok: false, error: "Lead has no airtable_record_id — nothing to sync." };
+  }
+
+  const stage = await updateDealStage(lead.airtable_record_id, status);
+  if (!stage.ok) return stage;
+  return updateDealNotes(lead.airtable_record_id, { dq_reason: trimmed });
+}
+
 // Mirror dashboard-edited notes / recording link back to Airtable so the next
 // sync (which pulls Notes + Recordings) doesn't overwrite them.
 export async function pushDealNotes(

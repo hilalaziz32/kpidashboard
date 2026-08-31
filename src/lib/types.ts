@@ -42,6 +42,21 @@ export const STATUS_LABEL: Record<LeadStatus, string> = {
   future: "Future Potential",
 };
 
+
+// Negative outcomes. Selecting one of these in the dashboard requires a written
+// reason, which is stored in Airtable's "Not closed-reason-feedback" field.
+// The reason is what lets us split in-our-control disqualifications (which do
+// not count as a qualified meeting) from outside-our-control ones (which do).
+export const NEGATIVE_STATUSES: LeadStatus[] = [
+  "not closed",
+  "lost",
+  "post_meeting_lost",
+];
+
+export function requiresReason(status: LeadStatus): boolean {
+  return NEGATIVE_STATUSES.includes(status);
+}
+
 export type LeadCategory = "meeting" | "pr";
 export type LeadSource = "email" | "sms";
 

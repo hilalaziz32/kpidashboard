@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { Lead, LEAD_STATUSES, LeadStatus, STATUS_LABEL } from "@/lib/types";
+import { Lead, LEAD_STATUSES, LeadStatus, STATUS_LABEL, requiresReason } from "@/lib/types";
+import { pushDealStatusWithReason } from "../lead-actions";
 
 export default function LeadDrawer({
   lead,
@@ -18,6 +19,8 @@ export default function LeadDrawer({
   isAdmin?: boolean;
 }) {
   const [status, setStatus] = useState<LeadStatus>(lead.status);
+  // A negative outcome cannot be saved without a written reason.
+  const [dqReason, setDqReason] = useState("");
   const [upfront, setUpfront] = useState(
     lead.upfront_collected ? String(lead.upfront_collected) : ""
   );
@@ -55,8 +58,22 @@ export default function LeadDrawer({
     };
   }, []);
 
+  const needsReason = requiresReason(status) && status !== lead.status;
+  const reasonMissing = needsReason && !dqReason.trim();
+
   async function save() {
+    if (reasonMissing) return;
     setSaving(true);
+    // Status + reason go to Airtable together, so a disqualification can never
+    // land there unexplained.
+    if (needsReason) {
+      const res = await pushDealStatusWithReason(lead.id, status, dqReason.trim());
+      if (!res.ok) {
+        alert(`Could not save: ${res.error}`);
+        setSaving(false);
+        return;
+      }
+    }
     await onSave({
       status,
       upfront_collected: Number(upfront) || 0,
@@ -170,6 +187,24 @@ export default function LeadDrawer({
             </select>
           </Field>
 
+          {needsReason && (
+            <Field label="Reason (required)">
+              <textarea
+                value={dqReason}
+                onChange={(e) => setDqReason(e.target.value)}
+                rows={3}
+                placeholder="Why is this lead being marked as such? Be specific — this decides whether the meeting counts as qualified."
+                className="w-full rounded-lg border bg-white px-3.5 py-2.5 text-[13px] outline-none resize-none focus:border-[var(--violet)] focus:ring-4 focus:ring-[var(--violet-50)]"
+                style={{ borderColor: reasonMissing ? "#F43F5E" : "var(--border-strong)" }}
+              />
+              {reasonMissing && (
+                <span className="text-[11px]" style={{ color: "#9F1239" }}>
+                  A reason is required before this can be saved.
+                </span>
+              )}
+            </Field>
+          )}
+
           {/* Forecasted deal size */}
           <div className="grid grid-cols-2 gap-3">
             <Field label="Deal Size (Monthly)">
@@ -242,7 +277,8 @@ export default function LeadDrawer({
           <div className="flex items-center gap-3">
             <button
               onClick={save}
-              disabled={saving}
+              disabled={saving || reasonMissing}
+              title={reasonMissing ? "Enter a reason first" : undefined}
               className="rounded-lg text-white font-medium px-5 py-2.5 text-[13px] transition-all disabled:opacity-50 hover:translate-y-[-1px] hover:shadow-lg"
               style={{
                 background: "var(--violet)",

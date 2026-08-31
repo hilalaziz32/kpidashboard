@@ -162,9 +162,15 @@ export async function updateDealNotes(
     notes?: string | null;
     call_recording_url?: string | null;
     closed_date?: string | null;
+    dq_reason?: string | null;
   }
 ): Promise<AirtableWriteResult> {
   const patch: Record<string, unknown> = {};
+  // Disqualification reason lives in the existing "Not closed-reason-feedback"
+  // field on Deals — the same place the team already records why a lead did not
+  // close. No new field; Airtable stays the source of truth.
+  if (fields.dq_reason !== undefined)
+    patch["Not closed-reason-feedback"] = fields.dq_reason ?? "";
   if (fields.closed_date !== undefined) patch["Closed date"] = fields.closed_date ?? null;
   if (fields.notes !== undefined) patch["Notes"] = fields.notes ?? "";
   // Recording links live in "Meeting URL" — must match what the sync reads,
