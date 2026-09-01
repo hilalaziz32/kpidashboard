@@ -39,7 +39,11 @@ export type PushStageResult =
 // failure here is surfaced but does not roll anything back.
 export async function pushDealStage(
   leadId: string,
-  status: LeadStatus
+  status: LeadStatus,
+  // The status the lead held before this change. Supplied by the caller because
+  // the dashboard writes Supabase first, so the stored row already holds the new
+  // status by the time we get here. Only affects which DQ stage is written.
+  previousStatus?: LeadStatus | null
 ): Promise<PushStageResult> {
   const supabase = await createClient();
   const {
@@ -60,7 +64,7 @@ export async function pushDealStage(
     return { ok: false, error: "Lead has no airtable_record_id — nothing to sync." };
   }
 
-  return updateDealStage(lead.airtable_record_id, status);
+  return updateDealStage(lead.airtable_record_id, status, previousStatus);
 }
 
 // Set a lead's status AND its disqualification reason in one call. Used when a
@@ -69,7 +73,8 @@ export async function pushDealStage(
 export async function pushDealStatusWithReason(
   leadId: string,
   status: LeadStatus,
-  reason: string
+  reason: string,
+  previousStatus?: LeadStatus | null
 ): Promise<PushStageResult> {
   const trimmed = reason.trim();
   if (!trimmed) return { ok: false, error: "A reason is required." };
@@ -90,7 +95,7 @@ export async function pushDealStatusWithReason(
     return { ok: false, error: "Lead has no airtable_record_id — nothing to sync." };
   }
 
-  const stage = await updateDealStage(lead.airtable_record_id, status);
+  const stage = await updateDealStage(lead.airtable_record_id, status, previousStatus);
   if (!stage.ok) return stage;
   return updateDealNotes(lead.airtable_record_id, { dq_reason: trimmed });
 }

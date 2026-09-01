@@ -67,7 +67,13 @@ export default function LeadDrawer({
     // Status + reason go to Airtable together, so a disqualification can never
     // land there unexplained.
     if (needsReason) {
-      const res = await pushDealStatusWithReason(lead.id, status, dqReason.trim());
+      // lead.status is still the pre-edit value at this point.
+      const res = await pushDealStatusWithReason(
+        lead.id,
+        status,
+        dqReason.trim(),
+        lead.status
+      );
       if (!res.ok) {
         alert(`Could not save: ${res.error}`);
         setSaving(false);

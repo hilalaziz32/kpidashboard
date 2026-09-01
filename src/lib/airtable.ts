@@ -1,4 +1,4 @@
-import { LeadStatus } from "./types";
+import { LeadStatus, MEETING_HELD_STATUSES } from "./types";
 
 // SERVER-ONLY. Never import into a client component — it uses the Airtable
 // secret. Used to write dashboard status changes back to the Airtable Deals
@@ -26,6 +26,9 @@ export const STAGE_TO_STATUS: Record<string, LeadStatus> = {
   Lost: "lost",
   "Post Meeting Lost": "post_meeting_lost",
   Disqualified: "not closed", // UI labels "not closed" as "Unqualified"
+  // Both DQ stages land on the same dashboard status. Which of the two we write
+  // back is decided per-transition by the prior stage — see updateDealStage.
+  "Post Meeting Disqualified": "not closed",
   // "Future Potential" is a POST-meeting outcome: the call happened and the lead
   // is worth revisiting. Airtable's older "Future Qualified" is a pre-meeting
   // stage, so it is deliberately not synced (like "Maybe" / "Positive Reply").
@@ -102,11 +105,30 @@ async function patchDeal(
   return { ok: true };
 }
 
+// A disqualification routes to one of two Airtable stages depending on whether
+// the meeting had already happened.
+//
+// `previousStatus` must be captured BEFORE the lead row is updated. We cannot
+// infer it by reading the deal's current stage here: a separate automation
+// mirrors Supabase status changes into "Pipeline stage" within a couple of
+// seconds, so by the time this runs Airtable usually already shows the new
+// stage. With no prior status we fall back to the generic stage, which is the
+// behaviour that predates this routing.
+function disqualifiedStage(previousStatus?: LeadStatus | null): string {
+  return previousStatus && MEETING_HELD_STATUSES.includes(previousStatus)
+    ? "Post Meeting Disqualified"
+    : "Disqualified";
+}
+
 export async function updateDealStage(
   airtableRecordId: string,
-  status: LeadStatus
+  status: LeadStatus,
+  previousStatus?: LeadStatus | null
 ): Promise<AirtableWriteResult> {
-  const stage = STATUS_TO_STAGE[status];
+  const stage =
+    status === "not closed"
+      ? disqualifiedStage(previousStatus)
+      : STATUS_TO_STAGE[status];
   if (!stage) return { ok: false, error: `No Airtable stage mapped for "${status}"` };
   return patchDeal(airtableRecordId, { [STAGE_FIELD]: stage });
 }

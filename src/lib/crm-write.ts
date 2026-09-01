@@ -84,14 +84,22 @@ export function validateLeadPatch(body: Record<string, unknown>): ValidationResu
 // sync would pull Airtable's older values straight back over the edit.
 export async function mirrorToAirtable(
   airtableRecordId: string | null,
-  patch: Record<string, unknown>
+  patch: Record<string, unknown>,
+  // The lead's status before this patch, read by the caller prior to the
+  // update. Decides which of Airtable's two DQ stages a disqualification lands
+  // in; see updateDealStage.
+  previousStatus?: LeadStatus | null
 ): Promise<{ mirrored: string[]; airtableError?: string }> {
   if (!airtableRecordId) return { mirrored: [] };
   const mirrored: string[] = [];
   let airtableError: string | undefined;
 
   if (patch.status) {
-    const r = await updateDealStage(airtableRecordId, patch.status as LeadStatus);
+    const r = await updateDealStage(
+      airtableRecordId,
+      patch.status as LeadStatus,
+      previousStatus
+    );
     if (r.ok) mirrored.push("Pipeline stage");
     else airtableError = r.error;
   }

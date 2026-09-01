@@ -6,6 +6,7 @@ import {
   mirrorToAirtable,
   validateLeadPatch,
 } from "@/lib/crm-write";
+import { LeadStatus } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -35,7 +36,7 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
 
     const { data: before, error: findErr } = await db()
       .from("leads")
-      .select("id, airtable_record_id")
+      .select("id, airtable_record_id, status")
       .eq("id", id)
       .single();
     if (findErr) return NextResponse.json({ error: `Lead not found: ${id}` }, { status: 404 });
@@ -50,7 +51,8 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
 
     const { mirrored, airtableError } = await mirrorToAirtable(
       before.airtable_record_id,
-      v.patch
+      v.patch,
+      before.status as LeadStatus
     );
 
     return NextResponse.json({

@@ -85,6 +85,9 @@ export default function PipelineView({
 
   const supabase = createClient();
   async function patchLead(id: string, patch: Partial<Lead>) {
+    // Captured before the optimistic update, so Airtable can tell a
+    // post-meeting disqualification from a pre-meeting one.
+    const previousStatus = leads.find((l) => l.id === id)?.status ?? null;
     setLeads((ls) => ls.map((l) => (l.id === id ? { ...l, ...patch } : l)));
     const { error } = await supabase.from("leads").update(patch).eq("id", id);
     if (error) {
@@ -94,7 +97,7 @@ export default function PipelineView({
     }
     // Mirror status changes back to Airtable (source of truth).
     if (patch.status) {
-      const res = await pushDealStage(id, patch.status);
+      const res = await pushDealStage(id, patch.status, previousStatus);
       if (!res.ok) alert(`Saved locally, but Airtable sync failed: ${res.error}`);
     }
     if ("notes" in patch || "call_recording_url" in patch) {

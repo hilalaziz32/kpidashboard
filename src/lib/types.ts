@@ -47,6 +47,20 @@ export const STATUS_LABEL: Record<LeadStatus, string> = {
 // reason, which is stored in Airtable's "Not closed-reason-feedback" field.
 // The reason is what lets us split in-our-control disqualifications (which do
 // not count as a qualified meeting) from outside-our-control ones (which do).
+// Statuses that mean the call actually took place. Used to tell a post-meeting
+// disqualification from a pre-meeting one when writing back to Airtable.
+// "meeting booked", "rescheduled" and "no show" are absent on purpose: the
+// meeting was booked but never held.
+export const MEETING_HELD_STATUSES: LeadStatus[] = [
+  "show",
+  "next stage",
+  "proposal sent",
+  "verbal agreement",
+  "won",
+  "post_meeting_lost",
+  "future",
+];
+
 export const NEGATIVE_STATUSES: LeadStatus[] = [
   "not closed",
   "lost",
