@@ -32,6 +32,10 @@ export async function proxy(request: NextRequest) {
   if (!user && !isAuthRoute && !isApiRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
+    // Carry the destination through the login bounce. Deep links arriving from
+    // Airtable are usually opened without a live session, and dropping them on
+    // /dashboard would lose the lead they were pointing at.
+    url.searchParams.set("next", path + request.nextUrl.search);
     return NextResponse.redirect(url);
   }
   if (user && path === "/login") {

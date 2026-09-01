@@ -10,7 +10,7 @@ import { getActiveTenant } from "@/lib/active-tenant";
 export default async function MonthPage({
   searchParams,
 }: {
-  searchParams: Promise<{ y?: string; m?: string; tab?: string }>;
+  searchParams: Promise<{ y?: string; m?: string; tab?: string; lead?: string }>;
 }) {
   const params = await searchParams;
   const now = new Date();
@@ -163,9 +163,9 @@ export default async function MonthPage({
       />
 
       {tab === "meetings" ? (
-        <LeadsTable leads={meetings} isAdmin={active?.isAdmin ?? false} />
+        <LeadsTable leads={meetings} isAdmin={active?.isAdmin ?? false} openLeadId={params.lead} />
       ) : (
-        <LeadsTable leads={prRows} prMode isAdmin={active?.isAdmin ?? false} />
+        <LeadsTable leads={prRows} prMode isAdmin={active?.isAdmin ?? false} openLeadId={params.lead} />
       )}
     </div>
   );

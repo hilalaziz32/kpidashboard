@@ -27,14 +27,18 @@ export default function LeadsTable({
   leads: initial,
   prMode = false,
   isAdmin = false,
+  openLeadId: initialOpenLeadId,
 }: {
   leads: Lead[];
   prMode?: boolean;
   isAdmin?: boolean;
+  // Set by the /dashboard/lead/<airtable id> deep link (Airtable's "Sales
+  // Dashboard Link"), so the drawer is already open on arrival.
+  openLeadId?: string;
 }) {
   const [leads, setLeads] = useState(initial);
   const [filter, setFilter] = useState<LeadStatus | "all">("all");
-  const [openLeadId, setOpenLeadId] = useState<string | null>(null);
+  const [openLeadId, setOpenLeadId] = useState<string | null>(initialOpenLeadId ?? null);
   const [pendingDq, setPendingDq] = useState<{ id: string; status: LeadStatus } | null>(null);
   const [pending, start] = useTransition();
   const router = useRouter();

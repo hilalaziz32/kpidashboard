@@ -4,6 +4,17 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
+// Where to land after signing in. proxy.ts puts the original path in ?next=
+// when it bounces a deep link (e.g. an Airtable "Sales Dashboard Link") to the
+// login page. Only same-site paths are honoured, so a crafted ?next= cannot
+// redirect someone off to another host.
+function redirectTarget(): string {
+  if (typeof window === "undefined") return "/dashboard";
+  const next = new URLSearchParams(window.location.search).get("next");
+  if (next && next.startsWith("/") && !next.startsWith("//")) return next;
+  return "/dashboard";
+}
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,7 +33,7 @@ export default function LoginPage() {
       setError(error.message);
       return;
     }
-    router.push("/dashboard");
+    router.push(redirectTarget());
     router.refresh();
   }
 
