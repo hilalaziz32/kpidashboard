@@ -2,6 +2,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import {
   BASE_ID,
   DEALS_TABLE_ID,
+  fetchAirtableClients,
   fetchDeal,
   first,
   STAGE_TO_STATUS,
@@ -250,4 +251,51 @@ export async function syncCurrentMonth(
     ...(merged ? { merged } : {}),
     ...(failed.length ? { failed } : {}),
   };
+}
+
+// --- Clients sync (Airtable Clients → Supabase clients) -------------------
+
+export type ClientSyncSummary = {
+  fetched: number;
+  updated: number;
+  unmatched: { name: string; reason: string }[];
+};
+
+// Pull the onboarding fields Airtable owns — account manager, website, contact
+// email — into the dashboard, matched on DashboardID. Onboarding points people
+// at the dashboard for these, so they have to be here and current.
+export async function syncClientsFromAirtable(): Promise<ClientSyncSummary> {
+  const rows = await fetchAirtableClients();
+  const admin = createAdminClient();
+  const unmatched: { name: string; reason: string }[] = [];
+  let updated = 0;
+
+  for (const c of rows) {
+    if (!c.dashboardId) {
+      unmatched.push({ name: c.name, reason: "no DashboardID" });
+      continue;
+    }
+    const { error, count } = await admin
+      .from("clients")
+      .update(
+        {
+          account_manager: c.accountManager,
+          website: c.website,
+          contact_email: c.contactEmail,
+        },
+        { count: "exact" }
+      )
+      .eq("id", c.dashboardId);
+
+    if (error) {
+      unmatched.push({ name: c.name, reason: error.message });
+      continue;
+    }
+    if (!count) {
+      unmatched.push({ name: c.name, reason: `no dashboard client ${c.dashboardId}` });
+      continue;
+    }
+    updated++;
+  }
+  return { fetched: rows.length, updated, unmatched };
 }

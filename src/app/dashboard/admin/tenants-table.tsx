@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { setAccountManager, syncClientDetails } from "./actions";
 
 type TenantRow = {
   id: string;
@@ -11,6 +12,10 @@ type TenantRow = {
   default_deal_size_monthly: number | null;
   default_deal_size_annual: number | null;
   active: boolean;
+  // Onboarding details, mirrored with Airtable's Clients table.
+  account_manager: string | null;
+  website: string | null;
+  contact_email: string | null;
 };
 
 export default function TenantsTable({ clients }: { clients: TenantRow[] }) {
@@ -36,10 +41,16 @@ export default function TenantsTable({ clients }: { clients: TenantRow[] }) {
   return (
     <div className="card overflow-hidden">
       <div className="px-6 py-4 border-b" style={{ borderColor: "var(--border)" }}>
-        <h3 className="text-[14px] font-semibold text-[var(--ink)]">Tenants</h3>
-        <p className="text-[12px] text-[var(--muted)] mt-0.5">
-          {rows.length} tenants · click any cell to edit. Saves on blur.
-        </p>
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <h3 className="text-[14px] font-semibold text-[var(--ink)]">Tenants</h3>
+            <p className="text-[12px] text-[var(--muted)] mt-0.5">
+              {rows.length} tenants · click any cell to edit. Saves on blur.
+              Website and client email are read-only — they come from Airtable.
+            </p>
+          </div>
+          <SyncDetailsButton />
+        </div>
       </div>
 
       <div className="overflow-x-auto">
@@ -50,6 +61,9 @@ export default function TenantsTable({ clients }: { clients: TenantRow[] }) {
                 { label: "Name", align: "left" },
                 { label: "ID (UUID)", align: "left" },
                 { label: "Slug", align: "left" },
+                { label: "Account Manager", align: "left" },
+                { label: "Website", align: "left" },
+                { label: "Client Email", align: "left" },
                 { label: "Meeting Target", align: "right" },
                 { label: "Default Deal $/mo", align: "right" },
                 { label: "Default Deal $/yr", align: "right" },
@@ -90,6 +104,27 @@ export default function TenantsTable({ clients }: { clients: TenantRow[] }) {
                 <td className="px-4 py-2.5 text-[var(--muted)] tabular text-[12px]">
                   {r.slug}
                 </td>
+                <td className="px-4 py-2.5">
+                  <TextCell
+                    value={r.account_manager}
+                    placeholder="unassigned"
+                    onSave={async (v) => {
+                      setRows((rs) =>
+                        rs.map((x) => (x.id === r.id ? { ...x, account_manager: v } : x))
+                      );
+                      setSavingId(r.id);
+                      const res = await setAccountManager(r.id, v);
+                      setSavingId(null);
+                      if (!res.ok) alert(res.error);
+                    }}
+                  />
+                </td>
+                <td className="px-4 py-2.5 text-[12px] text-[var(--muted)] max-w-[200px] truncate">
+                  {r.website ?? "—"}
+                </td>
+                <td className="px-4 py-2.5 text-[12px] text-[var(--muted)] max-w-[200px] truncate">
+                  {r.contact_email ?? "—"}
+                </td>
                 <td className="px-4 py-2.5 text-right">
                   <NumCell
                     value={r.kpi_target_meetings}
@@ -120,6 +155,61 @@ export default function TenantsTable({ clients }: { clients: TenantRow[] }) {
         </table>
       </div>
     </div>
+  );
+}
+
+function SyncDetailsButton() {
+  const [busy, setBusy] = useState(false);
+  return (
+    <button
+      disabled={busy}
+      onClick={async () => {
+        setBusy(true);
+        const res = await syncClientDetails();
+        setBusy(false);
+        if (!res.ok) {
+          alert(res.error);
+          return;
+        }
+        const { fetched, updated, unmatched } = res.summary;
+        alert(
+          `Synced ${updated} of ${fetched} Airtable clients.` +
+            (unmatched.length
+              ? `\n\nNot matched (${unmatched.length}):\n` +
+                unmatched.map((u) => `· ${u.name} — ${u.reason}`).join("\n")
+              : "")
+        );
+      }}
+      className="shrink-0 rounded-lg border px-3 py-1.5 text-[12px] text-[var(--ink)] transition hover:border-[var(--violet)] disabled:opacity-50"
+      style={{ borderColor: "var(--border-strong)" }}
+    >
+      {busy ? "Syncing…" : "Sync from Airtable"}
+    </button>
+  );
+}
+
+function TextCell({
+  value,
+  placeholder,
+  onSave,
+}: {
+  value: string | null;
+  placeholder?: string;
+  onSave: (v: string | null) => void;
+}) {
+  const [v, setV] = useState(value ?? "");
+  return (
+    <input
+      value={v}
+      placeholder={placeholder}
+      onChange={(e) => setV(e.target.value)}
+      onBlur={() => {
+        const next = v.trim() ? v.trim() : null;
+        if (next !== value) onSave(next);
+      }}
+      className="w-[130px] rounded-md border bg-transparent px-2 py-1 text-[12px] text-[var(--ink)] outline-none transition focus:border-[var(--violet)]"
+      style={{ borderColor: "var(--border)" }}
+    />
   );
 }
 

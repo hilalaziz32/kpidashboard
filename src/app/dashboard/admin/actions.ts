@@ -3,7 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { linkClientDashboardId } from "@/lib/airtable";
+import {
+  fetchAirtableClients,
+  linkClientDashboardId,
+  updateClientAccountManager,
+} from "@/lib/airtable";
+import { syncClientsFromAirtable, type ClientSyncSummary } from "@/lib/sync";
 
 export type CreateTenantResult =
   | {
@@ -79,4 +84,73 @@ export async function createTenant(formData: FormData): Promise<CreateTenantResu
     linked: link.ok,
     ...(link.ok ? {} : { linkError: link.error }),
   };
+}
+
+// --- Client onboarding details -------------------------------------------
+
+async function requireAdmin(): Promise<string | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return "Not authenticated.";
+  const { data: me } = await supabase
+    .from("client_users")
+    .select("role")
+    .eq("user_id", user.id)
+    .single();
+  return me?.role === "admin" ? null : "Admin only.";
+}
+
+export type ClientSyncResult =
+  | { ok: true; summary: ClientSyncSummary }
+  | { ok: false; error: string };
+
+// Refresh account manager / website / contact email from Airtable.
+export async function syncClientDetails(): Promise<ClientSyncResult> {
+  const denied = await requireAdmin();
+  if (denied) return { ok: false, error: denied };
+  try {
+    const summary = await syncClientsFromAirtable();
+    revalidatePath("/dashboard/admin");
+    return { ok: true, summary };
+  } catch (e) {
+    return { ok: false, error: (e as Error).message };
+  }
+}
+
+export type SetAmResult = { ok: true } | { ok: false; error: string };
+
+// Set a client's responsible account manager, mirroring it into Airtable so the
+// two can't drift (Airtable's Clients table is where it has always lived).
+export async function setAccountManager(
+  clientId: string,
+  accountManager: string | null
+): Promise<SetAmResult> {
+  const denied = await requireAdmin();
+  if (denied) return { ok: false, error: denied };
+
+  const value = accountManager?.trim() ? accountManager.trim() : null;
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("clients")
+    .update({ account_manager: value })
+    .eq("id", clientId);
+  if (error) return { ok: false, error: error.message };
+
+  // Find the matching Airtable record by DashboardID and mirror the change.
+  try {
+    const rows = await fetchAirtableClients();
+    const match = rows.find((r) => r.dashboardId === clientId);
+    if (!match) {
+      return { ok: false, error: "Saved, but no Airtable client links to this id." };
+    }
+    const res = await updateClientAccountManager(match.recordId, value);
+    if (!res.ok) return { ok: false, error: `Saved, but Airtable: ${res.error}` };
+  } catch (e) {
+    return { ok: false, error: `Saved, but Airtable: ${(e as Error).message}` };
+  }
+
+  revalidatePath("/dashboard/admin");
+  return { ok: true };
 }

@@ -201,3 +201,81 @@ export async function updateDealNotes(
     patch["Meeting URL"] = fields.call_recording_url ?? "";
   return patchDeal(airtableRecordId, patch);
 }
+
+// --- Clients table -------------------------------------------------------
+
+export type AirtableClient = {
+  recordId: string;
+  name: string;
+  dashboardId: string | null;
+  accountManager: string | null;
+  website: string | null;
+  contactEmail: string | null;
+  status: string | null;
+};
+
+// Every row of the Airtable Clients table. Small table (~50 rows), so one
+// unfiltered pass is cheaper than filtering per client.
+export async function fetchAirtableClients(): Promise<AirtableClient[]> {
+  const key = process.env.AIRTABLE_API_KEY;
+  if (!key) throw new Error("AIRTABLE_API_KEY not set");
+
+  const out: AirtableClient[] = [];
+  let offset: string | undefined;
+  do {
+    const url = new URL(`https://api.airtable.com/v0/${BASE_ID}/${CLIENTS_TABLE_ID}`);
+    url.searchParams.set("pageSize", "100");
+    if (offset) url.searchParams.set("offset", offset);
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${key}` },
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      throw new Error(`Airtable clients ${res.status}: ${(await res.text()).slice(0, 200)}`);
+    }
+    const json = (await res.json()) as {
+      records: { id: string; fields: Record<string, unknown> }[];
+      offset?: string;
+    };
+    for (const r of json.records) {
+      const f = r.fields;
+      out.push({
+        recordId: r.id,
+        name: (first(f["Client Name"]) ?? "").trim(),
+        dashboardId: first(f["DashboardID"]),
+        // "Account Manager" is a multi-select; first() takes the first choice.
+        accountManager: first(f["Account Manager"]),
+        website: first(f["Website"]),
+        contactEmail: first(f["Client's Email"]),
+        status: first(f["Client Status"]),
+      });
+    }
+    offset = json.offset;
+  } while (offset);
+  return out;
+}
+
+// Push a dashboard-side account manager change back to Airtable, so the two
+// never disagree (same write-back rule as deal status).
+export async function updateClientAccountManager(
+  airtableRecordId: string,
+  accountManager: string | null
+): Promise<AirtableWriteResult> {
+  const key = process.env.AIRTABLE_API_KEY;
+  if (!key) return { ok: false, error: "AIRTABLE_API_KEY not set" };
+  const res = await fetch(
+    `https://api.airtable.com/v0/${BASE_ID}/${CLIENTS_TABLE_ID}/${airtableRecordId}`,
+    {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      // Multi-select: an empty array clears it.
+      body: JSON.stringify({
+        fields: { "Account Manager": accountManager ? [accountManager] : [] },
+      }),
+    }
+  );
+  if (!res.ok) {
+    return { ok: false, error: `Airtable ${res.status}: ${(await res.text()).slice(0, 200)}` };
+  }
+  return { ok: true };
+}

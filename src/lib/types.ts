@@ -110,6 +110,12 @@ export type Client = {
   name: string;
   slug: string;
   kpi_target_meetings: number;
+  // Mirrored from Airtable's Clients table. Onboarding needs these in one
+  // place so the automation can point at the dashboard instead of waiting on
+  // someone to type them into a task description.
+  account_manager: string | null;
+  website: string | null;
+  contact_email: string | null;
 };
 
 export type MarketingStats = {

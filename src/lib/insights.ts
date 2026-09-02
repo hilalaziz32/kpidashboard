@@ -101,7 +101,7 @@ export async function fetchLeads(f: Filters, extra?: { category?: string }) {
 }
 
 export async function clientLookup() {
-  const { data } = await db().from("clients").select("id, name, slug, active, kpi_target_meetings");
+  const { data } = await db().from("clients").select("id, name, slug, active, kpi_target_meetings, account_manager, website, contact_email");
   const byId = new Map((data ?? []).map((c) => [c.id, c]));
   return { list: data ?? [], byId };
 }
